@@ -7,6 +7,15 @@ artie_videos:
     name: artie
   download_path: data/artie_videos
 
+download:
+  access_key: ${AWS_ACCESS_KEY_ID}
+  secret_key: ${AWS_SECRET_ACCESS_KEY}
+  bucket_name: artie-datasets
+  bucket_region: eu-west-3
+  files_to_download:
+    - CK+.zip
+  local_destination_path: data
+
 data_augmentation:
   dataset_images_path: data/CK+
   dataset_emotions_path: data/CK+_emotions
