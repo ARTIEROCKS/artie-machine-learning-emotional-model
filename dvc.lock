@@ -1,0 +1,8 @@
+schema: '2.0'
+stages:
+  download:
+    cmd: python src/download.py params.yaml
+    outs:
+    - path: data/CK+.zip
+      md5: 96a0d6b5368dd2b92f78cdc2ab730dde
+      size: 1669368768
