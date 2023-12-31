@@ -1,0 +1,5 @@
+[core]
+    autostage = true
+    remote = dvc-storage-emotional-model
+['remote "dvc-storage-emotional-model"']
+    url = s3://artie-ml/dvc-storage-emotional-model/

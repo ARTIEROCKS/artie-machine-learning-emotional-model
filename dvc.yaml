@@ -1,0 +1,13 @@
+stages:
+  download_videos:
+    cmd: python3 src/download_videos_from_db.py params.yaml
+    outs:
+      - data/artie_videos
+  data_augmentation:
+    cmd: python3 src/bilstm_preprocess.py params.yaml
+    outs:
+      - data/CK_Augmented/emotions.csv
+  normalization:
+    cmd: python3 src/normalization.py params.yaml
+    deps:
+      - data/CK_Augmented/emotions.csv
