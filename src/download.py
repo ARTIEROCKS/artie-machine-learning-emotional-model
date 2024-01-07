@@ -2,6 +2,8 @@ import boto3
 import yaml
 from botocore.exceptions import NoCredentialsError
 import sys
+import zipfile
+import os
 
 
 def download_file_from_s3(bucket_name, file_name, local_path, region, access_key, secret_key):
@@ -12,6 +14,13 @@ def download_file_from_s3(bucket_name, file_name, local_path, region, access_key
         s3.download_file(bucket_name, file_name, local_path)
     except NoCredentialsError:
         print("Error: AWS credentials not found. Make sure to configure them correctly.")
+
+
+def unzip_file(zip_file, destination_directory):
+    with zipfile.ZipFile(zip_file, 'r') as zip_ref:
+        # Extract all files to the destination directory
+        zip_ref.extractall(destination_directory)
+        print(f'Files extracted to: {destination_directory}')
 
 
 # Loading the parameters
@@ -31,3 +40,4 @@ sk = params['download']['secret_key']
 # Downloading all the files
 for file in files_to_download:
     download_file_from_s3(bucket_n, file, str(local_destination_path) + '/' + str(file), reg, ak, sk)
+    unzip_file(str(local_destination_path) + '/' + str(file), str(local_destination_path))

@@ -6,3 +6,26 @@ stages:
     - path: data/CK+.zip
       md5: 96a0d6b5368dd2b92f78cdc2ab730dde
       size: 1669368768
+  download_videos:
+    cmd: python src/download_videos_from_db.py params.yaml
+    outs:
+    - path: data/artie_videos
+      md5: 285757fa3295e690d0a3fd2730e4a055.dir
+      size: 166163587
+      nfiles: 413
+  data_augmentation:
+    cmd: python src/bilstm_preprocess.py params.yaml
+    deps:
+    - path: data/CK+.zip
+      md5: 96a0d6b5368dd2b92f78cdc2ab730dde
+      size: 1669368768
+    outs:
+    - path: data/CK_Augmented/emotions.csv
+      md5: e29d393599e5bb4eb2e766ffabd3974e
+      size: 2547359
+  normalization:
+    cmd: python src/normalization.py params.yaml
+    deps:
+    - path: data/CK_Augmented/emotions.csv
+      md5: e29d393599e5bb4eb2e766ffabd3974e
+      size: 2547359
