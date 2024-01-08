@@ -31,7 +31,7 @@ for inputPath in tqdm(image_list, desc="Procesando", unit="imagen"):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     # write the output image to disk
-    resized = imutils.resize(gray, width=256, height=256)
+    resized = imutils.resize(gray, width=48, height=48)
     cv2.imwrite(os.path.join(normalization_path, str(inputPath).split("/")[-1]), resized)
 
     # display the output images

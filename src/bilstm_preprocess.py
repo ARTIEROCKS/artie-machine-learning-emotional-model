@@ -156,14 +156,12 @@ Path(dataset_images_augmented_path).mkdir(parents=True, exist_ok=True)
 image_list, emotions_df = get_images(dataset_images_path, dataset_emotions_path)
 
 # 2- Performing the preprocessing
-emotion_list = []
-augmented_file_list = []
-images = []
+data = []
 element = False
 
 for image_path in tqdm(image_list, desc="Procesando", unit="imagen"):
 
-    # 2.1- Gets the new path and the filename without the extension
+    # 2.1 Gets the new path and the filename without the extension
     new_path = str(image_path).replace(dataset_images_path, dataset_images_augmented_path)
     new_path_arr = new_path.split("/")
     file_name = new_path_arr[len(new_path_arr) - 1]
@@ -172,7 +170,7 @@ for image_path in tqdm(image_list, desc="Procesando", unit="imagen"):
     file_name = file_name_arr[0]
     # print(file_name)
 
-    # 2.2- Gets the emotional state corresponding to the file
+    # 2.2 Gets the emotional state corresponding to the file
     df = emotions_df.loc[emotions_df['corresponding_image'] == file_name]
 
     emotion = int(-1)
@@ -207,15 +205,13 @@ for image_path in tqdm(image_list, desc="Procesando", unit="imagen"):
         Path(new_file_path).mkdir(parents=True, exist_ok=True)
 
         # 2.5.3- Adds the augmented file name and the corresponding emotion
-        emotion_list.append(emotion)
-        augmented_file_list.append(new_file_full_path)
+        data.append({'emotion': emotion, 'corresponding_image': new_file_full_path})
 
         # 2.5.4- Resizes the image
         image_resized = image_resize(images_augmented[i])
 
         # 2.5.4- Writes the image in the file system and adds the image to the list
         np_image = np.asarray(image_resized)
-        images.append(np_image)
         cv2.imwrite(new_file_full_path, image_resized)
         del image_resized, np_image
 
@@ -223,16 +219,10 @@ for image_path in tqdm(image_list, desc="Procesando", unit="imagen"):
 
     del images_augmented
 
-    # 3- Saves the all the emotions with their corresponding augmented file list
-    d = {'emotion': emotion_list, 'corresponding_image': augmented_file_list}
-    temp_df = pd.DataFrame(data=d)
-    if element == False:
-        temp_df.to_csv(dataset_emotions_augmented_path + "/emotions.csv", index=True, header=True, mode='w')
-        element = True
-    else:
-        temp_df.to_csv(dataset_emotions_augmented_path + "/emotions.csv", index=True, header=False, mode='a')
+# 3- Saves the all the emotions with their corresponding augmented file list
+temp_df = pd.DataFrame(data=data)
+temp_df.to_csv(dataset_emotions_augmented_path + "/emotions.csv", index=False, header=True, mode='a')
 
-    del emotion_list, augmented_file_list, images, temp_df
-    emotion_list = augmented_file_list = images = []
+del temp_df
 
 del detector
