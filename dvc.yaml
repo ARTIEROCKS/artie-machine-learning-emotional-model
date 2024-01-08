@@ -17,3 +17,17 @@ stages:
     cmd: python src/normalization.py params.yaml
     deps:
       - data/CK_Augmented/emotions.csv
+    outs:
+      - data/CK_Augmented/normalization
+  training:
+    cmd: python src/training.py params.yaml
+    deps:
+      - data/CK_Augmented/normalization
+      - data/CK_Augmented/emotions.csv
+    params:
+      - training.batch_size
+      - training.epochs
+      - training.train_percentage
+    outs:
+      - model/fer.h5
+      - model/fer.json

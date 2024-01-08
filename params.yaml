@@ -24,3 +24,12 @@ data_augmentation:
 
 normalization:
   normalization_path: data/CK_Augmented/normalization
+
+training:
+  emotion_csv_file: data/CK_Augmented/emotions.csv
+  normalized_path: data/CK_Augmented/normalization
+  model_path: model
+  num_labels: 7
+  batch_size: 64
+  epochs: 30
+  train_percentage: 0.8

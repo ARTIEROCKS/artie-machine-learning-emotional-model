@@ -102,13 +102,13 @@ with open(params_file, 'r') as fd:
 # Getting parameters
 emotion_csv_file = params['training']['emotion_csv_file']
 normalized_images_path = params['training']['normalized_path']
+model_path = params['training']['model_path']
 
-num_features = 64
-num_labels = 7
-batch_size = 64
-epochs = 30
+num_labels = params['training']['num_labels']
+batch_size = params['training']['batch_size']
+epochs = params['training']['epochs']
 width, height = 48, 48
-train_percentage = 0.8
+train_percentage = params['training']['train_percentage']
 
 # Reading pandas and getting labels and files
 df = pd.read_csv(emotion_csv_file)
@@ -155,6 +155,6 @@ cnn.fit(X_train, Y_train,
 
 # Saving the  model to  use it later on
 fer_json = cnn.to_json()
-with open("fer.json", "w") as json_file:
+with open(model_path + "/fer.json", "w") as json_file:
     json_file.write(fer_json)
-cnn.save_weights("fer.h5")
+cnn.save_weights(model_path + "/fer.h5")
