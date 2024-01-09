@@ -8,6 +8,7 @@ from keras.src.layers import Conv2D, MaxPooling2D, Dropout, Flatten, Dense
 from keras.src.losses import categorical_crossentropy
 from keras.src.optimizers import Adam
 from tqdm import tqdm
+from pathlib import Path
 
 
 # Relating image and emotional state
@@ -109,6 +110,9 @@ batch_size = params['training']['batch_size']
 epochs = params['training']['epochs']
 width, height = 48, 48
 train_percentage = params['training']['train_percentage']
+
+# Creates the output dir
+Path(model_path).mkdir(parents=True, exist_ok=True)
 
 # Reading pandas and getting labels and files
 df = pd.read_csv(emotion_csv_file)

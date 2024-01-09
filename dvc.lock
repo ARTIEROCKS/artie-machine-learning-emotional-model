@@ -21,11 +21,35 @@ stages:
       size: 1669368768
     outs:
     - path: data/CK_Augmented/emotions.csv
-      md5: 4a017d67a1f112234d87a981485b7f21
-      size: 126747623
+      md5: 313e2c18a0d99f23f1d1c06bd2163adc
+      size: 175300
   normalization:
     cmd: python src/normalization.py params.yaml
     deps:
     - path: data/CK_Augmented/emotions.csv
-      md5: 4a017d67a1f112234d87a981485b7f21
-      size: 126747623
+      md5: 313e2c18a0d99f23f1d1c06bd2163adc
+      size: 175300
+    outs:
+    - path: data/CK_Augmented/normalization
+      md5: 2ccb78ab3e0eb8fcd8195fc8fd1f2576.dir
+      size: 3742276
+      nfiles: 2616
+  training:
+    cmd: python src/training.py params.yaml
+    deps:
+    - path: data/CK_Augmented/normalization
+      md5: 2ccb78ab3e0eb8fcd8195fc8fd1f2576.dir
+      size: 3742276
+      nfiles: 2616
+    params:
+      params.yaml:
+        training.batch_size: 64
+        training.epochs: 30
+        training.train_percentage: 0.8
+    outs:
+    - path: model/fer.h5
+      md5: f23c2d7839952d9971a04ec6ff183d2a
+      size: 7700960
+    - path: model/fer.json
+      md5: dc94f95504f88010b552f142ec53c9d1
+      size: 9087

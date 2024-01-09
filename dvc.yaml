@@ -23,7 +23,6 @@ stages:
     cmd: python src/training.py params.yaml
     deps:
       - data/CK_Augmented/normalization
-      - data/CK_Augmented/emotions.csv
     params:
       - training.batch_size
       - training.epochs
