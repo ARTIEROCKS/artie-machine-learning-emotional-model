@@ -30,3 +30,8 @@ stages:
     outs:
       - model/fer.h5
       - model/fer.json
+    metrics:
+      - metrics/scores.json:
+          cache: false
+    plots:
+      - metrics/plots.csv

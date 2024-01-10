@@ -1,4 +1,6 @@
 import sys
+
+import tensorflow as tf
 import yaml
 import cv2
 import numpy as np
@@ -13,7 +15,6 @@ from pathlib import Path
 
 # Relating image and emotional state
 def relate_image_emotional_state(emotion_df, normalized_path, n_labels):
-
     # Setting the class
     indexes = emotion_df['emotion'].values
 
@@ -29,7 +30,7 @@ def relate_image_emotional_state(emotion_df, normalized_path, n_labels):
         x.append(image)
 
         y_temp = np.zeros(n_labels)
-        y_temp[indexes[index]-1] = 1
+        y_temp[indexes[index] - 1] = 1
         y.append(y_temp)
 
     return x, y
@@ -74,7 +75,7 @@ def create_model(n_labels):
     # Compliling the model
     model.compile(loss=categorical_crossentropy,
                   optimizer=Adam(),
-                  metrics=['accuracy'])
+                  metrics=['accuracy', tf.keras.metrics.Precision(), tf.keras.metrics.Recall(thresholds=0)])
 
     return model
 
@@ -111,8 +112,12 @@ epochs = params['training']['epochs']
 width, height = 48, 48
 train_percentage = params['training']['train_percentage']
 
-# Creates the output dir
+show_summary = params['training']['show_summary']
+metrics_path = params['training']['metrics_path']
+
+# Creates the needed directories
 Path(model_path).mkdir(parents=True, exist_ok=True)
+Path(metrics_path).mkdir(parents=True, exist_ok=True)
 
 # Reading pandas and getting labels and files
 df = pd.read_csv(emotion_csv_file)
@@ -150,15 +155,36 @@ X_test = X_test.reshape(X_test.shape[0], 48, 48, 1)
 cnn = create_model(7)
 
 # Training the model
-cnn.fit(X_train, Y_train,
-        batch_size=batch_size,
-        epochs=epochs,
-        verbose=1,
-        validation_data=(X_test, Y_test),
-        shuffle=True)
+history = cnn.fit(X_train, Y_train,
+                  batch_size=batch_size,
+                  epochs=epochs,
+                  verbose=1,
+                  validation_data=(X_test, Y_test),
+                  shuffle=True)
 
 # Saving the  model to  use it later on
 fer_json = cnn.to_json()
 with open(model_path + "/fer.json", "w") as json_file:
     json_file.write(fer_json)
 cnn.save_weights(model_path + "/fer.h5")
+
+# If we want to show the summary
+if show_summary:
+    cnn.summary()
+    Path('images').mkdir(parents=True, exist_ok=True)
+    tf.keras.utils.plot_model(cnn, to_file='images/model.png', dpi=200)
+
+# Saving the plots and metrics
+# convert the history.history dict to a pandas DataFrame:
+hist_df = pd.DataFrame(history.history)
+
+metrics_data = {'loss': hist_df['loss'].mean(), 'accuracy': hist_df['accuracy'].mean(),
+                'precision': hist_df['precision'].mean(), 'recall': hist_df['recall'].mean(),
+                'val_loss': hist_df['val_loss'].mean()}
+metrics_df = pd.DataFrame.from_records([metrics_data])
+
+with open(metrics_path + "/plots.csv", mode='w') as f:
+    hist_df.to_csv(f, index_label='epoch')
+
+with open(metrics_path + "/scores.json", mode='w') as f:
+    metrics_df.to_json(f)
