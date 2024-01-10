@@ -3,9 +3,14 @@ stages:
   download:
     cmd: python src/download.py params.yaml
     outs:
-    - path: data/CK+.zip
-      md5: 96a0d6b5368dd2b92f78cdc2ab730dde
-      size: 1669368768
+    - path: data/CK+
+      md5: e1c8b38aa6b547b44be89d1ae6bdd233.dir
+      size: 1666260883
+      nfiles: 10731
+    - path: data/FER2013
+      md5: 8951f54b0c9f75c74db0a1ce61c78bc5.dir
+      size: 56516337
+      nfiles: 35888
   download_videos:
     cmd: python src/download_videos_from_db.py params.yaml
     outs:
@@ -16,9 +21,14 @@ stages:
   data_augmentation:
     cmd: python src/bilstm_preprocess.py params.yaml
     deps:
-    - path: data/CK+.zip
-      md5: 96a0d6b5368dd2b92f78cdc2ab730dde
-      size: 1669368768
+    - path: data/CK+
+      md5: e1c8b38aa6b547b44be89d1ae6bdd233.dir
+      size: 1666260883
+      nfiles: 10731
+    - path: data/FER2013
+      md5: 8951f54b0c9f75c74db0a1ce61c78bc5.dir
+      size: 56516337
+      nfiles: 35888
     outs:
     - path: data/CK_Augmented/emotions.csv
       md5: 313e2c18a0d99f23f1d1c06bd2163adc

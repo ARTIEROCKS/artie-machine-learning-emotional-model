@@ -103,7 +103,7 @@ with open(params_file, 'r') as fd:
 
 # Getting parameters
 emotion_csv_file = params['training']['emotion_csv_file']
-normalized_images_path = params['training']['normalized_path']
+normalized_images_path = params['normalization']['normalization_path']
 model_path = params['training']['model_path']
 
 num_labels = params['training']['num_labels']

@@ -14,6 +14,7 @@ download:
   bucket_region: eu-west-3
   files_to_download:
     - CK+.zip
+    - FER2013.zip
   local_destination_path: data
 
 data_augmentation:
@@ -23,13 +24,15 @@ data_augmentation:
   dataset_images_augmented_path: data/CK_Augmented/CK+_augmented
 
 normalization:
-  normalization_path: data/CK_Augmented/normalization
+  fer_2013_path: data/FER_2013
+  normalization_path: data/normalization
 
 training:
-  emotion_csv_file: data/CK_Augmented/emotions.csv
-  normalized_path: data/CK_Augmented/normalization
+  emotion_csv_file: data/normalization/emotions.csv
+  metrics_path: metrics
   model_path: model
   num_labels: 7
   batch_size: 64
   epochs: 30
   train_percentage: 0.8
+  show_summary: false

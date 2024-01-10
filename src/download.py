@@ -22,6 +22,10 @@ def unzip_file(zip_file, destination_directory):
         zip_ref.extractall(destination_directory)
         print(f'Files extracted to: {destination_directory}')
 
+    if os.path.exists(zip_file):
+        # Removes zip file
+        os.remove(zip_file)
+
 
 # Loading the parameters
 params_file = sys.argv[1]
