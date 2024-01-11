@@ -24,7 +24,7 @@ data_augmentation:
   dataset_images_augmented_path: data/CK_Augmented/CK+_augmented
 
 normalization:
-  fer_2013_path: data/FER_2013
+  fer_2013_path: data/FER2013
   normalization_path: data/normalization
 
 training:

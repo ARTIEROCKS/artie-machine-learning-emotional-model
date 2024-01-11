@@ -19,7 +19,7 @@ stages:
       size: 166163587
       nfiles: 413
   data_augmentation:
-    cmd: python src/bilstm_preprocess.py params.yaml
+    cmd: python src/bilstm_data_augmentation.py params.yaml
     deps:
     - path: data/CK+
       md5: e1c8b38aa6b547b44be89d1ae6bdd233.dir

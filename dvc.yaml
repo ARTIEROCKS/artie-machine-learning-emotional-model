@@ -6,23 +6,25 @@ stages:
   download:
     cmd: python src/download.py params.yaml
     outs:
-      - data/CK+.zip
+      - data/CK+
+      - data/FER2013
   data_augmentation:
-    cmd: python src/bilstm_preprocess.py params.yaml
+    cmd: python src/bilstm_data_augmentation.py params.yaml
     outs:
       - data/CK_Augmented/emotions.csv
     deps:
-      - data/CK+.zip
+      - data/CK+
+      - data/FER2013
   normalization:
     cmd: python src/normalization.py params.yaml
     deps:
       - data/CK_Augmented/emotions.csv
     outs:
-      - data/CK_Augmented/normalization
+      - data/normalization
   training:
     cmd: python src/training.py params.yaml
     deps:
-      - data/CK_Augmented/normalization
+      - data/normalization
     params:
       - training.batch_size
       - training.epochs
