@@ -11,14 +11,14 @@ stages:
   data_augmentation:
     cmd: python src/bilstm_data_augmentation.py params.yaml
     outs:
-      - data/CK_Augmented/emotions.csv
+      - data/CK_Augmented/CK+_augmented
     deps:
       - data/CK+
       - data/FER2013
   normalization:
     cmd: python src/normalization.py params.yaml
     deps:
-      - data/CK_Augmented/emotions.csv
+      - data/CK_Augmented/CK+_augmented
     outs:
       - data/normalization
   training:

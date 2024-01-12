@@ -204,10 +204,7 @@ for image_path in tqdm(image_list, desc="Procesando", unit="imagen"):
         # 2.5.2- Creates the full directory
         Path(new_file_path).mkdir(parents=True, exist_ok=True)
 
-        # 2.5.3- Adds the augmented file name and the corresponding emotion
-        data.append({'emotion': emotion, 'corresponding_image': new_file_full_path})
-
-        # 2.5.4- Resizes the image
+        # 2.5.3- Resizes the image
         image_resized = image_resize(images_augmented[i])
 
         # 2.5.4- Writes the image in the file system and adds the image to the list
@@ -215,14 +212,6 @@ for image_path in tqdm(image_list, desc="Procesando", unit="imagen"):
         cv2.imwrite(new_file_full_path, image_resized)
         del image_resized, np_image
 
-        # print("FILE: ", new_file_full_path, "EMOTION: ", str(emotion))
-
     del images_augmented
-
-# 3- Saves the all the emotions with their corresponding augmented file list
-temp_df = pd.DataFrame(data=data)
-temp_df.to_csv(dataset_emotions_augmented_path + "/emotions.csv", index=False, header=True, mode='a')
-
-del temp_df
 
 del detector

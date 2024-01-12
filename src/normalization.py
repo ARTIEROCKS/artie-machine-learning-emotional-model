@@ -9,11 +9,44 @@ from tqdm import tqdm
 from pathlib import Path
 
 
+# Function to normalize emotional state for CK+
+def ck_emotional_state_normalization(emotional_state_path, augmented_images_path, root_path, csv_path):
+    print("Image List and Emotion Collection")
+
+    emotions_list = []
+    corresponding_images = []
+    emotions_file_list = list(Path(emotional_state_path).rglob("*.txt"))
+
+    for emotion_file in tqdm(emotions_file_list, desc="Processing CK+ emotions", unit="image"):
+        # Reading the emotional state from the emotions_file_list
+        f = open(str(emotion_file), "r")
+        contents = f.read()
+        value = float(contents)
+        emotion = int(value)
+
+        # Gets the name of the original corresponding image
+        emotion_file_splitted = str(emotion_file).split("/")
+        emotion_file_name = emotion_file_splitted[len(emotion_file_splitted) - 1]
+        emotion_file_name_splitted = emotion_file_name.split(".")
+        emotion_file_name_splitted = emotion_file_name_splitted[0].split("_emotion")
+        emotion_file_name = emotion_file_name_splitted[0]
+
+        # Gets the augmented files corresponding to the emotional state
+        emotion_image_list = list(Path(root_path).rglob(emotion_file_name + "*.png"))
+        for image in emotion_image_list:
+            emotions_list.append(emotion)
+            corresponding_images.append(str(image))
+
+    # Adds all the rows and columns to the emotion data frame
+    d = {'emotion': emotions_list, 'corresponding_image': corresponding_images}
+    emotions_df = pd.DataFrame(data=d)
+    emotions_df.to_csv(csv_path, index=False, header=True, mode='a')
+
+
 # Function to normalize the CK+ augmented files
 def ck_normalization(ds_images_augmented_path):
     # Getting the list of images
     image_list = list(Path(ds_images_augmented_path).rglob("*.png"))
-    image_list_size = len(image_list)
 
     print("CK+ Image processing is starting.")
 
@@ -78,7 +111,7 @@ def fer2013_normalization(dataset_path, destination_path, emotion_csv_file):
 
     # Writes the data in the csv file
     temp_df = pd.DataFrame(data=data)
-    temp_df.to_csv(emotion_csv_file, index=False, header=True, mode='a')
+    temp_df.to_csv(emotion_csv_file, index=False, header=False, mode='a')
 
 
 # Loading the parameters
@@ -86,18 +119,18 @@ params_file = sys.argv[1]
 with open(params_file, 'r') as fd:
     params = yaml.safe_load(fd)
 
-dataset_emotions_augmented_path = params['data_augmentation']['dataset_emotions_augmented_path']
 dataset_images_augmented_path = params['data_augmentation']['dataset_images_augmented_path']
+dataset_images_augmented_emotions_path = params['data_augmentation']['dataset_emotions_path']
 dataset_images_fer2013_path = params['normalization']['fer_2013_path']
 normalization_path = params['normalization']['normalization_path']
+emotion_csv_path = params['normalization']['csv_path']
+
 
 Path(normalization_path).mkdir(parents=True, exist_ok=True)
 
-# Move the csv to the normalization path
-shutil.move(dataset_emotions_augmented_path + "/emotions.csv", normalization_path + "/emotions.csv")
-
-# Normalize CK+ dataset
+# Normalize CK+ dataset and creates the csv of emotions
 ck_normalization(dataset_images_augmented_path)
+ck_emotional_state_normalization(dataset_images_augmented_emotions_path, dataset_images_augmented_path, normalization_path, emotion_csv_path)
 
 # Normalize FER 2013 datasets
 fer2013_normalization(dataset_images_fer2013_path + "/train", normalization_path, normalization_path + "/emotions.csv")
