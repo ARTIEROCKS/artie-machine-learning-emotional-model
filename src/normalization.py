@@ -17,7 +17,7 @@ def ck_emotional_state_normalization(emotional_state_path, augmented_images_path
     corresponding_images = []
     emotions_file_list = list(Path(emotional_state_path).rglob("*.txt"))
 
-    for emotion_file in tqdm(emotions_file_list, desc="Processing CK+ emotions", unit="image"):
+    for emotion_file in tqdm(emotions_file_list, desc="Normalizing CK+ emotions", unit="image"):
         # Reading the emotional state from the emotions_file_list
         f = open(str(emotion_file), "r")
         contents = f.read()
@@ -48,10 +48,10 @@ def ck_normalization(ds_images_augmented_path):
     # Getting the list of images
     image_list = list(Path(ds_images_augmented_path).rglob("*.png"))
 
-    print("CK+ Image processing is starting.")
+    print("CK+ Image normalization is starting.")
 
     # loop over the input images
-    for inputPath in tqdm(image_list, desc="Processing CK+", unit="image"):
+    for inputPath in tqdm(image_list, desc="Normalizing CK+", unit="image"):
         # load the image, convert it to grayscale, and describe it
         image = cv2.imread(str(inputPath))
 
@@ -68,7 +68,7 @@ def ck_normalization(ds_images_augmented_path):
 
 # Function to normalize FER 2013 dataset
 def fer2013_normalization(dataset_path, destination_path, emotion_csv_file):
-    print("FER 2013 Image processing is starting.")
+    print("FER 2013 Image normalization is starting.")
 
     # Getting training images
     emotional_states = [name for name in os.listdir(dataset_path) if
@@ -96,7 +96,7 @@ def fer2013_normalization(dataset_path, destination_path, emotion_csv_file):
         file_names = os.listdir(subfolder_path)
 
         # Iterate through each file in the subfolder
-        for file_name in tqdm(file_names, desc="Processing FER2013", unit="image"):
+        for file_name in tqdm(file_names, desc="Normalizing FER2013", unit="image"):
             full_file_path = os.path.join(subfolder_path, file_name)
             image = cv2.imread(str(full_file_path))
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
