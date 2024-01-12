@@ -11,6 +11,7 @@ from keras.src.losses import categorical_crossentropy
 from keras.src.optimizers import Adam
 from tqdm import tqdm
 from pathlib import Path
+import matplotlib.pyplot as plt
 
 
 # Relating image and emotional state
@@ -184,7 +185,18 @@ metrics_data = {'loss': hist_df['loss'].mean(), 'accuracy': hist_df['accuracy'].
 metrics_df = pd.DataFrame.from_records([metrics_data])
 
 with open(metrics_path + "/plots.csv", mode='w') as f:
-    hist_df.to_csv(f, index_label='epoch')
+    metrics_df.to_csv(f, index_label='epoch')
 
 with open(metrics_path + "/scores.json", mode='w') as f:
     metrics_df.to_json(f)
+
+# Saving training history plot
+plt.figure()
+plt.ylabel('Loss / Accuracy')
+plt.xlabel('Epoch')
+
+for k in hist_df.keys():
+    plt.plot(history.history[k], label=k)
+
+plt.legend(loc='best')
+plt.savefig("plots/train_history.png", dpi=150, bbox_inches='tight', pad_inches=0)
