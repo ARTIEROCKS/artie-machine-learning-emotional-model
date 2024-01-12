@@ -30,35 +30,43 @@ stages:
       size: 56516337
       nfiles: 35888
     outs:
-    - path: data/CK_Augmented/emotions.csv
-      md5: 313e2c18a0d99f23f1d1c06bd2163adc
-      size: 175300
+    - path: data/CK_Augmented/CK+_augmented
+      md5: 1d20a9027b0ab0b5e5b1c23297636f6d.dir
+      size: 148581874
+      nfiles: 2616
   normalization:
     cmd: python src/normalization.py params.yaml
     deps:
-    - path: data/CK_Augmented/emotions.csv
-      md5: 313e2c18a0d99f23f1d1c06bd2163adc
-      size: 175300
-    outs:
-    - path: data/CK_Augmented/normalization
-      md5: 2ccb78ab3e0eb8fcd8195fc8fd1f2576.dir
-      size: 3742276
+    - path: data/CK_Augmented/CK+_augmented
+      md5: 1d20a9027b0ab0b5e5b1c23297636f6d.dir
+      size: 148581874
       nfiles: 2616
+    outs:
+    - path: data/normalization
+      md5: 05cb5a83d92ef732e8b708c00266bf13.dir
+      size: 61930909
+      nfiles: 38502
   training:
     cmd: python src/training.py params.yaml
     deps:
-    - path: data/CK_Augmented/normalization
-      md5: 2ccb78ab3e0eb8fcd8195fc8fd1f2576.dir
-      size: 3742276
-      nfiles: 2616
+    - path: data/normalization
+      md5: 05cb5a83d92ef732e8b708c00266bf13.dir
+      size: 61930909
+      nfiles: 38502
     params:
       params.yaml:
         training.batch_size: 64
         training.epochs: 30
         training.train_percentage: 0.8
     outs:
+    - path: metrics/plots.csv
+      md5: 3ae34f003e2abeabe7fa568c36898241
+      size: 3790
+    - path: metrics/scores.json
+      md5: a4ad0aac7a9b188a1639c39d1c3bfbdd
+      size: 135
     - path: model/fer.h5
-      md5: f23c2d7839952d9971a04ec6ff183d2a
+      md5: c09505f5d0ae7fc881b5af0e98176cf6
       size: 7700960
     - path: model/fer.json
       md5: dc94f95504f88010b552f142ec53c9d1
