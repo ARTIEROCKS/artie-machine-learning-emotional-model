@@ -119,6 +119,7 @@ metrics_path = params['training']['metrics_path']
 # Creates the needed directories
 Path(model_path).mkdir(parents=True, exist_ok=True)
 Path(metrics_path).mkdir(parents=True, exist_ok=True)
+Path('plots').mkdir(parents=True, exist_ok=True)
 
 # Reading pandas and getting labels and files
 df = pd.read_csv(emotion_csv_file)

@@ -135,6 +135,108 @@ def from_np_array(array_string):
     return np.array(ast.literal_eval(array_string))
 
 
+# Data augmentation for LIRIS Children
+def data_augmentation_liris(videos_path, images_path, mtcnn):
+    # Ensure the images directory exists, if not, create it
+    if not os.path.exists(images_path):
+        os.makedirs(images_path)
+
+    # Iterate over each file in the videos directory
+    videos_list = os.listdir(videos_path)
+    for video_file in tqdm(videos_list, desc="Augmenting LIRIS data", unit=" video"):
+        if video_file.endswith(".avi") or video_file.endswith(".mp4"):
+
+            # Create the full path to the video file
+            full_video_path = os.path.join(videos_path, video_file)
+
+            # Open the video file
+            cap = cv2.VideoCapture(full_video_path)
+
+            # Iterate over frames in the video
+            while True:
+                ret, frame = cap.read()
+
+                # Check if the end of the video is reached
+                if not ret:
+                    break
+
+                # Capturing the face
+                face = mtcnn.detect_faces(frame)
+                bounding_box = face[0]['box']
+                face = frame[bounding_box[1]:bounding_box[1] + bounding_box[3],
+                       bounding_box[0]:bounding_box[0] + bounding_box[2]]
+
+                # Save the current frame as a .png image
+                image_name = f"{os.path.splitext(video_file)[0]}_{cap.get(cv2.CAP_PROP_POS_FRAMES)}.png"
+                image_path = os.path.join(images_path, image_name)
+                cv2.imwrite(image_path, face)
+
+            # Release the VideoCapture object
+            cap.release()
+
+
+# Function to augment CK+ dataset
+def data_augmentation_ck(images_list, ds_images_path, ds_images_augmented_path, emotions_dataframe):
+    # 2- Performing the preprocessing
+    data = []
+    element = False
+
+    for image_path in tqdm(images_list, desc="Processing", unit="image"):
+
+        # 2.1 Gets the new path and the filename without the extension
+        new_path = str(image_path).replace(ds_images_path, ds_images_augmented_path)
+        new_path_arr = new_path.split("/")
+        file_name = new_path_arr[len(new_path_arr) - 1]
+        file_name_arr = file_name.split(".")
+
+        file_name = file_name_arr[0]
+        # print(file_name)
+
+        # 2.2 Gets the emotional state corresponding to the file
+        df = emotions_dataframe.loc[emotions_dataframe['corresponding_image'] == file_name]
+
+        emotion = int(-1)
+
+        # If there is a result: corresponding emotion, if not: -1
+        if not df.empty:
+            # If there is a result, we get the corresponding emotion
+            # display(df['emotion'].values[0])
+            emotion = df['emotion'].values[0]
+
+        # 2.4- Data augmentation
+        images_augmented = []
+        if emotion >= 0:
+            face, img = face_detection(image_path, detector)
+            images_augmented = data_augmentation(img, face)
+            del img, face
+
+        del df
+
+        for i in range(len(images_augmented)):
+
+            # 2.5.1- Creates the new filename and the directory
+            new_file_name = file_name + "_" + str(i)
+            new_file_full_path = new_path.replace(file_name, new_file_name)
+            new_file_path = new_file_full_path.replace(new_file_name + '.png', '')
+
+            # If the file exists we continue to the next file
+            if os.path.exists(new_file_full_path):
+                continue
+
+            # 2.5.2- Creates the full directory
+            Path(new_file_path).mkdir(parents=True, exist_ok=True)
+
+            # 2.5.3- Resizes the image
+            image_resized = image_resize(images_augmented[i])
+
+            # 2.5.4- Writes the image in the file system and adds the image to the list
+            np_image = np.asarray(image_resized)
+            cv2.imwrite(new_file_full_path, image_resized)
+            del image_resized, np_image
+
+        del images_augmented
+
+
 # Loading the parameters
 params_file = sys.argv[1]
 
@@ -143,75 +245,24 @@ with open(params_file, 'r') as fd:
 
 # np.set_printoptions(threshold=sys.maxsize)
 warnings.simplefilter('ignore')
-dataset_images_path = params['data_augmentation']['dataset_images_path']
-dataset_emotions_path = params['data_augmentation']['dataset_emotions_path']
-dataset_emotions_augmented_path = params['data_augmentation']['dataset_emotions_augmented_path']
-dataset_images_augmented_path = params['data_augmentation']['dataset_images_augmented_path']
+dataset_images_path = params['data_augmentation']['dataset_ck_images_path']
+dataset_emotions_path = params['data_augmentation']['dataset_ck_emotions_path']
+dataset_emotions_augmented_path = params['data_augmentation']['dataset_ck_emotions_augmented_path']
+dataset_images_augmented_path = params['data_augmentation']['dataset_ck_images_augmented_path']
+dataset_liris_videos_path = params['data_augmentation']['dataset_liris_videos_path']
+dataset_liris_images_path = params['data_augmentation']['dataset_liris_images_augmented_path']
 detector = MTCNN()
 
 Path(dataset_emotions_augmented_path).mkdir(parents=True, exist_ok=True)
 Path(dataset_images_augmented_path).mkdir(parents=True, exist_ok=True)
 
 # 1- Getting images and emotional states
-image_list, emotions_df = get_images(dataset_images_path, dataset_emotions_path)
+# image_list, emotions_df = get_images(dataset_images_path, dataset_emotions_path)
 
-# 2- Performing the preprocessing
-data = []
-element = False
+# 2.1 Data augmentation for CK+
+# data_augmentation_ck(image_list, dataset_images_path, dataset_images_augmented_path, emotions_df)
 
-for image_path in tqdm(image_list, desc="Procesando", unit="imagen"):
-
-    # 2.1 Gets the new path and the filename without the extension
-    new_path = str(image_path).replace(dataset_images_path, dataset_images_augmented_path)
-    new_path_arr = new_path.split("/")
-    file_name = new_path_arr[len(new_path_arr) - 1]
-    file_name_arr = file_name.split(".")
-
-    file_name = file_name_arr[0]
-    # print(file_name)
-
-    # 2.2 Gets the emotional state corresponding to the file
-    df = emotions_df.loc[emotions_df['corresponding_image'] == file_name]
-
-    emotion = int(-1)
-
-    # If there is a result: corresponding emotion, if not: -1
-    if not df.empty:
-        # If there is a result, we get the corresponding emotion
-        # display(df['emotion'].values[0])
-        emotion = df['emotion'].values[0]
-
-    # 2.4- Data augmentation
-    images_augmented = []
-    if emotion >= 0:
-        face, img = face_detection(image_path, detector)
-        images_augmented = data_augmentation(img, face)
-        del img, face
-
-    del df
-
-    for i in range(len(images_augmented)):
-
-        # 2.5.1- Creates the new filename and the directory
-        new_file_name = file_name + "_" + str(i)
-        new_file_full_path = new_path.replace(file_name, new_file_name)
-        new_file_path = new_file_full_path.replace(new_file_name + '.png', '')
-
-        # If the file exists we continue to the next file
-        if os.path.exists(new_file_full_path):
-            continue
-
-        # 2.5.2- Creates the full directory
-        Path(new_file_path).mkdir(parents=True, exist_ok=True)
-
-        # 2.5.3- Resizes the image
-        image_resized = image_resize(images_augmented[i])
-
-        # 2.5.4- Writes the image in the file system and adds the image to the list
-        np_image = np.asarray(image_resized)
-        cv2.imwrite(new_file_full_path, image_resized)
-        del image_resized, np_image
-
-    del images_augmented
+# 2.2 Data augmentation for LIRIS Children dataset
+data_augmentation_liris(dataset_liris_videos_path, dataset_liris_images_path, detector)
 
 del detector

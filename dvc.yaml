@@ -8,6 +8,7 @@ stages:
     outs:
       - data/CK+
       - data/FER2013
+      - data/LirisChildren
   data_augmentation:
     cmd: python src/bilstm_data_augmentation.py params.yaml
     outs:
@@ -15,6 +16,7 @@ stages:
     deps:
       - data/CK+
       - data/FER2013
+      - data/LirisChildren
   normalization:
     cmd: python src/normalization.py params.yaml
     deps:
