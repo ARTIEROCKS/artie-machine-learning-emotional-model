@@ -11,6 +11,10 @@ stages:
       md5: 8951f54b0c9f75c74db0a1ce61c78bc5.dir
       size: 56516337
       nfiles: 35888
+    - path: data/LirisChildren
+      md5: 42e81046821beb33cf76a779c9f3a383.dir
+      size: 458015053
+      nfiles: 208
   download_videos:
     cmd: python src/download_videos_from_db.py params.yaml
     outs:
@@ -29,6 +33,10 @@ stages:
       md5: 8951f54b0c9f75c74db0a1ce61c78bc5.dir
       size: 56516337
       nfiles: 35888
+    - path: data/LirisChildren
+      md5: 42e81046821beb33cf76a779c9f3a383.dir
+      size: 458015053
+      nfiles: 208
     outs:
     - path: data/CK_Augmented/CK+_augmented
       md5: 1d20a9027b0ab0b5e5b1c23297636f6d.dir
@@ -43,9 +51,9 @@ stages:
       nfiles: 2616
     outs:
     - path: data/normalization
-      md5: 05cb5a83d92ef732e8b708c00266bf13.dir
-      size: 61930909
-      nfiles: 38502
+      md5: 1f4f3362ec33fd88bfa3a3a3a09ae2e5.dir
+      size: 116293081
+      nfiles: 64155
   training:
     cmd: python src/training.py params.yaml
     deps:

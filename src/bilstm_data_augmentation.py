@@ -162,14 +162,16 @@ def data_augmentation_liris(videos_path, images_path, mtcnn):
 
                 # Capturing the face
                 face = mtcnn.detect_faces(frame)
-                bounding_box = face[0]['box']
-                face = frame[bounding_box[1]:bounding_box[1] + bounding_box[3],
-                       bounding_box[0]:bounding_box[0] + bounding_box[2]]
 
-                # Save the current frame as a .png image
-                image_name = f"{os.path.splitext(video_file)[0]}_{cap.get(cv2.CAP_PROP_POS_FRAMES)}.png"
-                image_path = os.path.join(images_path, image_name)
-                cv2.imwrite(image_path, face)
+                if face is not None and len(face) > 0:
+                    bounding_box = face[0]['box']
+                    face = frame[bounding_box[1]:bounding_box[1] + bounding_box[3],
+                           bounding_box[0]:bounding_box[0] + bounding_box[2]]
+
+                    # Save the current frame as a .png image
+                    image_name = f"{os.path.splitext(video_file)[0]}_{cap.get(cv2.CAP_PROP_POS_FRAMES)}.png"
+                    image_path = os.path.join(images_path, image_name)
+                    cv2.imwrite(image_path, face)
 
             # Release the VideoCapture object
             cap.release()
@@ -257,10 +259,10 @@ Path(dataset_emotions_augmented_path).mkdir(parents=True, exist_ok=True)
 Path(dataset_images_augmented_path).mkdir(parents=True, exist_ok=True)
 
 # 1- Getting images and emotional states
-# image_list, emotions_df = get_images(dataset_images_path, dataset_emotions_path)
+image_list, emotions_df = get_images(dataset_images_path, dataset_emotions_path)
 
 # 2.1 Data augmentation for CK+
-# data_augmentation_ck(image_list, dataset_images_path, dataset_images_augmented_path, emotions_df)
+data_augmentation_ck(image_list, dataset_images_path, dataset_images_augmented_path, emotions_df)
 
 # 2.2 Data augmentation for LIRIS Children dataset
 data_augmentation_liris(dataset_liris_videos_path, dataset_liris_images_path, detector)

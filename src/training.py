@@ -24,7 +24,7 @@ def relate_image_emotional_state(emotion_df, normalized_path, n_labels):
     y = []
 
     # Iterate over the values in the "corresponding_image" column
-    for index, image_path in tqdm(enumerate(emotion_df['corresponding_image']), desc="Procesando", unit="imagen"):
+    for index, image_path in tqdm(enumerate(emotion_df['corresponding_image']), desc="Processing", unit=" image"):
         parts = image_path.split("/")
         file_name = parts[-1]
         image = cv2.imread(normalized_path + "/" + file_name, cv2.IMREAD_GRAYSCALE)
@@ -125,6 +125,14 @@ Path('plots').mkdir(parents=True, exist_ok=True)
 df = pd.read_csv(emotion_csv_file)
 x, y = relate_image_emotional_state(df, normalized_images_path, num_labels)
 X_train, X_test, Y_train, Y_test = split_for_training(x, y, train_percentage)
+
+# Get the unique shapes of arrays in the list
+unique_shapes = set(arr.shape for arr in X_train)
+
+# Print the different sizes
+print("Different sizes in the list:")
+for shape in unique_shapes:
+    print(shape)
 
 # Reshaping
 X_train = np.array(X_train, 'float32')

@@ -58,7 +58,7 @@ def ck_normalization(ds_images_augmented_path):
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
         # write the output image to disk
-        resized = imutils.resize(gray, width=48, height=48)
+        resized = cv2.resize(gray, (48, 48))
         cv2.imwrite(os.path.join(normalization_path, str(inputPath).split("/")[-1]), resized)
 
         # display the output images
@@ -92,11 +92,11 @@ def fer2013_normalization(dataset_path, destination_path, emotion_csv_file, es_m
 
             # write the output image to disk
             new_file_path = os.path.join(destination_path, file_name)
-            resized = imutils.resize(gray, width=48, height=48)
+            resized = cv2.resize(gray, (48, 48))
             cv2.imwrite(new_file_path, resized)
 
             # Write the information in the dataframe
-            data.append({'emotion': es_mapping[emotional_state], 'corresponding_image': new_file_path})
+            data.append({'emotion': int(es_mapping[emotional_state]), 'corresponding_image': new_file_path})
 
     # Writes the data in the csv file
     temp_df = pd.DataFrame(data=data)
@@ -107,7 +107,7 @@ def liris_normalization(source_path, destination_path, emotion_csv_file, es_mapp
     print("LIRIS Image normalization is starting.")
 
     # Getting the list of images
-    image_list = [name for name in os.listdir(source_path) if name.endswith(".png")]
+    image_list = [name for name in os.listdir(source_path) if name.endswith(".png") or name.endswith(".jpg")]
     data = []
 
     # loop over the input images
@@ -122,11 +122,11 @@ def liris_normalization(source_path, destination_path, emotion_csv_file, es_mapp
 
         # write the output image to disk
         new_file_path = os.path.join(destination_path, image_name)
-        resized = imutils.resize(gray, width=48, height=48)
+        resized = cv2.resize(gray, (48, 48))
         cv2.imwrite(new_file_path, resized)
 
         # Write the information in the dataframe
-        data.append({'emotion': es_mapping[emotional_state.lower()], 'corresponding_image': new_file_path})
+        data.append({'emotion': int(es_mapping[emotional_state.lower()]), 'corresponding_image': new_file_path})
 
     # Writes the data in the csv file
     temp_df = pd.DataFrame(data=data)
@@ -164,15 +164,15 @@ mapping = {
 }
 
 # Normalize CK+ dataset and creates the csv of emotions
-# ck_normalization(dataset_ck_images_augmented_path)
-# ck_emotional_state_normalization(dataset_ck_emotions_augmented_path, dataset_ck_images_augmented_path,
-#                                 normalization_path, emotion_csv_path)
+ck_normalization(dataset_ck_images_augmented_path)
+ck_emotional_state_normalization(dataset_ck_emotions_augmented_path, dataset_ck_images_augmented_path,
+                                 normalization_path, emotion_csv_path)
 
 # Normalize FER 2013 datasets
-# fer2013_normalization(dataset_images_fer2013_path + "/train", normalization_path, normalization_path + "/emotions.csv",
-#                       mapping)
-# fer2013_normalization(dataset_images_fer2013_path + "/test", normalization_path, normalization_path + "/emotions.csv",
-#                      mapping)
+fer2013_normalization(dataset_images_fer2013_path + "/train", normalization_path, normalization_path + "/emotions.csv",
+                       mapping)
+fer2013_normalization(dataset_images_fer2013_path + "/test", normalization_path, normalization_path + "/emotions.csv",
+                      mapping)
 
 # Normalize LIRIS dataset
 liris_normalization(dataset_images_augmented_liris_path, normalization_path, normalization_path + "/emotions.csv",
