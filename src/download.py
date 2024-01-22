@@ -38,8 +38,8 @@ bucket_n = params['download']['bucket_name']
 files_to_download = params['download']['files_to_download']
 local_destination_path = params['download']['local_destination_path']
 reg = params['download']['bucket_region']
-ak = params['download']['access_key']
-sk = params['download']['secret_key']
+ak = os.environ.get('AWS_ACCESS_KEY_ID')
+sk = os.environ.get('AWS_SECRET_ACCESS_KEY')
 
 # Downloading all the files
 for file in files_to_download:

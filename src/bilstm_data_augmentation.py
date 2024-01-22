@@ -262,9 +262,11 @@ Path(dataset_images_augmented_path).mkdir(parents=True, exist_ok=True)
 image_list, emotions_df = get_images(dataset_images_path, dataset_emotions_path)
 
 # 2.1 Data augmentation for CK+
-data_augmentation_ck(image_list, dataset_images_path, dataset_images_augmented_path, emotions_df)
+if params['general']['active_datasets']['ck']:
+    data_augmentation_ck(image_list, dataset_images_path, dataset_images_augmented_path, emotions_df)
 
 # 2.2 Data augmentation for LIRIS Children dataset
-data_augmentation_liris(dataset_liris_videos_path, dataset_liris_images_path, detector)
+if params['general']['active_datasets']['liris']:
+    data_augmentation_liris(dataset_liris_videos_path, dataset_liris_images_path, detector)
 
 del detector

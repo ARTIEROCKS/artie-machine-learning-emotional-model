@@ -164,16 +164,19 @@ mapping = {
 }
 
 # Normalize CK+ dataset and creates the csv of emotions
-ck_normalization(dataset_ck_images_augmented_path)
-ck_emotional_state_normalization(dataset_ck_emotions_augmented_path, dataset_ck_images_augmented_path,
-                                 normalization_path, emotion_csv_path)
+if params['general']['active_datasets']['ck']:
+    ck_normalization(dataset_ck_images_augmented_path)
+    ck_emotional_state_normalization(dataset_ck_emotions_augmented_path, dataset_ck_images_augmented_path,
+                                     normalization_path, emotion_csv_path)
 
 # Normalize FER 2013 datasets
-fer2013_normalization(dataset_images_fer2013_path + "/train", normalization_path, normalization_path + "/emotions.csv",
-                       mapping)
-fer2013_normalization(dataset_images_fer2013_path + "/test", normalization_path, normalization_path + "/emotions.csv",
-                      mapping)
+if params['general']['active_datasets']['fer2013']:
+    fer2013_normalization(dataset_images_fer2013_path + "/train", normalization_path, normalization_path + "/emotions.csv",
+                           mapping)
+    fer2013_normalization(dataset_images_fer2013_path + "/test", normalization_path, normalization_path + "/emotions.csv",
+                          mapping)
 
 # Normalize LIRIS dataset
-liris_normalization(dataset_images_augmented_liris_path, normalization_path, normalization_path + "/emotions.csv",
-                    mapping)
+if params['general']['active_datasets']['liris']:
+    liris_normalization(dataset_images_augmented_liris_path, normalization_path, normalization_path + "/emotions.csv",
+                        mapping)

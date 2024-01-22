@@ -14,8 +14,8 @@ with open(params_file, 'r') as fd:
 # 1- get the connection parameters
 serverHost = params['artie_videos']['db']['host']
 serverPort = params['artie_videos']['db']['port']
-serverUser = params['artie_videos']['db']['user']
-serverPassword = params['artie_videos']['db']['password']
+serverUser = os.environ.get('DB_USER')
+serverPassword = os.environ.get('DB_PASSWORD')
 serverDb = params['artie_videos']['db']['name']
 directory = params['artie_videos']['download_path']
 

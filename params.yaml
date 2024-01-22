@@ -1,15 +1,17 @@
+general:
+  active_datasets:
+    ck: true
+    fer2013: true
+    liris: true
+
 artie_videos:
   db:
     host: coruscant.artie.rocks
     port: 27017
-    user: ${DB_USER}
-    password: ${DB_PASSWORD}
     name: artie
   download_path: data/artie_videos
 
 download:
-  access_key: AKIA6HPGIXKWJNYQV4XU
-  secret_key: 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
   bucket_name: artie-datasets
   bucket_region: eu-west-3
   files_to_download:
