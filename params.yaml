@@ -1,26 +1,44 @@
+general:
+  active_datasets:
+    ck: true
+    fer2013: true
+    liris: true
+
 artie_videos:
   db:
     host: coruscant.artie.rocks
     port: 27017
-    user: ${DB_USER}
-    password: ${DB_PASSWORD}
     name: artie
   download_path: data/artie_videos
 
 download:
-  access_key: ${AWS_ACCESS_KEY_ID}
-  secret_key: ${AWS_SECRET_ACCESS_KEY}
   bucket_name: artie-datasets
   bucket_region: eu-west-3
   files_to_download:
-    - CK+.zip
+  - CK+.zip
+  - FER2013.zip
+  - LIRISChildren.zip
   local_destination_path: data
 
 data_augmentation:
-  dataset_images_path: data/CK+
-  dataset_emotions_path: data/CK+_emotions
-  dataset_emotions_augmented_path: data/CK_Augmented
-  dataset_images_augmented_path: data/CK_Augmented/CK+_augmented
+  dataset_ck_images_path: data/CK+
+  dataset_ck_emotions_path: data/CK+_emotions
+  dataset_ck_emotions_augmented_path: data/CK_Augmented
+  dataset_ck_images_augmented_path: data/CK_Augmented/CK+_augmented
+  dataset_liris_videos_path: data/LIRISChildren
+  dataset_liris_images_augmented_path: data/LIRIS_Augmented
 
 normalization:
-  normalization_path: data/CK_Augmented/normalization
+  csv_path: data/normalization/emotions.csv
+  fer_2013_path: data/FER2013
+  normalization_path: data/normalization
+
+training:
+  emotion_csv_file: data/normalization/emotions.csv
+  metrics_path: metrics
+  model_path: model
+  num_labels: 7
+  batch_size: 64
+  epochs: 50
+  train_percentage: 0.75
+  show_summary: false

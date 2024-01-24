@@ -1,19 +1,37 @@
 stages:
-  download_videos:
-    cmd: python src/download_videos_from_db.py params.yaml
-    outs:
-      - data/artie_videos
   download:
     cmd: python src/download.py params.yaml
     outs:
-      - data/CK+.zip
+      - data/CK+
+      - data/FER2013
+      - data/LirisChildren
   data_augmentation:
-    cmd: python src/bilstm_preprocess.py params.yaml
+    cmd: python src/bilstm_data_augmentation.py params.yaml
     outs:
-      - data/CK_Augmented/emotions.csv
+      - data/CK_Augmented/CK+_augmented
     deps:
-      - data/CK+.zip
+      - data/CK+
+      - data/FER2013
+      - data/LirisChildren
   normalization:
     cmd: python src/normalization.py params.yaml
     deps:
-      - data/CK_Augmented/emotions.csv
+      - data/CK_Augmented/CK+_augmented
+    outs:
+      - data/normalization
+  training:
+    cmd: python src/training.py params.yaml
+    deps:
+      - data/normalization
+    params:
+      - training.batch_size
+      - training.epochs
+      - training.train_percentage
+    outs:
+      - model/fer.h5
+      - model/fer.json
+    metrics:
+      - metrics/scores.json:
+          cache: true
+    plots:
+      - metrics/plots.csv

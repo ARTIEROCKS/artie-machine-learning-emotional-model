@@ -3,6 +3,79 @@ stages:
   download:
     cmd: python src/download.py params.yaml
     outs:
-    - path: data/CK+.zip
-      md5: 96a0d6b5368dd2b92f78cdc2ab730dde
-      size: 1669368768
+    - path: data/CK+
+      md5: e1c8b38aa6b547b44be89d1ae6bdd233.dir
+      size: 1666260883
+      nfiles: 10731
+    - path: data/FER2013
+      md5: 8951f54b0c9f75c74db0a1ce61c78bc5.dir
+      size: 56516337
+      nfiles: 35888
+    - path: data/LirisChildren
+      md5: 42e81046821beb33cf76a779c9f3a383.dir
+      size: 458015053
+      nfiles: 208
+  download_videos:
+    cmd: python src/download_videos_from_db.py params.yaml
+    outs:
+    - path: data/artie_videos
+      md5: 285757fa3295e690d0a3fd2730e4a055.dir
+      size: 166163587
+      nfiles: 413
+  data_augmentation:
+    cmd: python src/bilstm_data_augmentation.py params.yaml
+    deps:
+    - path: data/CK+
+      md5: e1c8b38aa6b547b44be89d1ae6bdd233.dir
+      size: 1666260883
+      nfiles: 10731
+    - path: data/FER2013
+      md5: 8951f54b0c9f75c74db0a1ce61c78bc5.dir
+      size: 56516337
+      nfiles: 35888
+    - path: data/LirisChildren
+      md5: 42e81046821beb33cf76a779c9f3a383.dir
+      size: 458015053
+      nfiles: 208
+    outs:
+    - path: data/CK_Augmented/CK+_augmented
+      md5: 1d20a9027b0ab0b5e5b1c23297636f6d.dir
+      size: 148581874
+      nfiles: 2616
+  normalization:
+    cmd: python src/normalization.py params.yaml
+    deps:
+    - path: data/CK_Augmented/CK+_augmented
+      md5: 1d20a9027b0ab0b5e5b1c23297636f6d.dir
+      size: 148581874
+      nfiles: 2616
+    outs:
+    - path: data/normalization
+      md5: ad61a5174dde85bf22425674e50130ed.dir
+      size: 106715976
+      nfiles: 64155
+  training:
+    cmd: python src/training.py params.yaml
+    deps:
+    - path: data/normalization
+      md5: ad61a5174dde85bf22425674e50130ed.dir
+      size: 106715976
+      nfiles: 64155
+    params:
+      params.yaml:
+        training.batch_size: 64
+        training.epochs: 50
+        training.train_percentage: 0.75
+    outs:
+    - path: metrics/plots.csv
+      md5: 1176597f7525a15aa3d0e66118d49ae7
+      size: 128
+    - path: metrics/scores.json
+      md5: f2f2d1ed1b1ead03d753f99923253779
+      size: 137
+    - path: model/fer.h5
+      md5: ba17433c3bcd4ff200560ee8fd59191a
+      size: 7700960
+    - path: model/fer.json
+      md5: dc94f95504f88010b552f142ec53c9d1
+      size: 9087
