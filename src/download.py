@@ -4,6 +4,7 @@ from botocore.exceptions import NoCredentialsError
 import sys
 import zipfile
 import os
+from dotenv import load_dotenv
 
 
 def download_file_from_s3(bucket_name, file_name, local_path, region, access_key, secret_key):
@@ -28,6 +29,7 @@ def unzip_file(zip_file, destination_directory):
 
 
 # Loading the parameters
+load_dotenv()
 params_file = sys.argv[1]
 
 with open(params_file, 'r') as fd:

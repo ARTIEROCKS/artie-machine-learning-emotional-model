@@ -15,9 +15,9 @@ download:
   bucket_name: artie-datasets
   bucket_region: eu-west-3
   files_to_download:
-    - CK+.zip
-    - FER2013.zip
-    - LIRISChildren.zip
+  - CK+.zip
+  - FER2013.zip
+  - LIRISChildren.zip
   local_destination_path: data
 
 data_augmentation:
@@ -39,6 +39,6 @@ training:
   model_path: model
   num_labels: 7
   batch_size: 64
-  epochs: 30
-  train_percentage: 0.8
+  epochs: 50
+  train_percentage: 0.75
   show_summary: false

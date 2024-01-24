@@ -1,8 +1,4 @@
 stages:
-  download_videos:
-    cmd: python src/download_videos_from_db.py params.yaml
-    outs:
-      - data/artie_videos
   download:
     cmd: python src/download.py params.yaml
     outs:
