@@ -76,7 +76,26 @@ def create_model(n_labels):
     # Compliling the model
     model.compile(loss=categorical_crossentropy,
                   optimizer=Adam(),
-                  metrics=['accuracy', tf.keras.metrics.Precision(), tf.keras.metrics.Recall(thresholds=0)])
+                  metrics=['accuracy',
+                           tf.keras.metrics.Precision(),
+                           tf.keras.metrics.Recall(thresholds=0.5),
+                           tf.keras.metrics.FalsePositives(),
+                           tf.keras.metrics.FalseNegatives(),
+                           tf.keras.metrics.TruePositives(),
+                           tf.keras.metrics.TrueNegatives(),
+                           tf.keras.metrics.PrecisionAtRecall(0.5),
+                           tf.keras.metrics.SensitivityAtSpecificity(0.5),
+                           tf.keras.metrics.SpecificityAtSensitivity(0.5),
+                           tf.keras.metrics.MeanIoU(
+                               n_labels,
+                               name=None,
+                               dtype=None,
+                               ignore_class=None,
+                               sparse_y_true=True,
+                               sparse_y_pred=True,
+                               axis=-1,
+                           )
+                           ])
 
     return model
 
@@ -190,7 +209,14 @@ hist_df = pd.DataFrame(history.history)
 
 metrics_data = {'loss': hist_df['loss'].mean(), 'accuracy': hist_df['accuracy'].mean(),
                 'precision': hist_df['precision'].mean(), 'recall': hist_df['recall'].mean(),
-                'val_loss': hist_df['val_loss'].mean()}
+                'val_loss': hist_df['val_loss'].mean(), 'false_positives': hist_df['false_positives'],
+                'false_negatives': hist_df['false_negatives'].mean(),
+                'true_positives': hist_df['true_positives'].mean(),
+                'true_negatives': hist_df['true_negatives'].mean(),
+                'precision_at_recall': hist_df['precision_at_recall'].mean(),
+                'sensitivity_at_specificity': hist_df['sensitivity_at_specificity'].mean(),
+                'specificity_at_sensitivity': hist_df['specificity_at_sensitivity'].mean(),
+                'mean_io_u': hist_df['mean_io_u']}
 metrics_df = pd.DataFrame.from_records([metrics_data])
 
 with open(metrics_path + "/plots.csv", mode='w') as f:
