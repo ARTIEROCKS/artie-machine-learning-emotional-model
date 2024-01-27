@@ -68,13 +68,13 @@ stages:
         training.train_percentage: 0.75
     outs:
     - path: metrics/plots.csv
-      md5: 1176597f7525a15aa3d0e66118d49ae7
-      size: 128
+      md5: dad98b0dff052481f9c2aaf7e2cbd68f
+      size: 18741
     - path: metrics/scores.json
-      md5: f2f2d1ed1b1ead03d753f99923253779
-      size: 137
+      md5: 4cb69213363ef97ce4fb9757d16b47a4
+      size: 35922
     - path: model/fer.h5
-      md5: ba17433c3bcd4ff200560ee8fd59191a
+      md5: 5a7ce2d6fddbbab099f087c26dd50814
       size: 7700960
     - path: model/fer.json
       md5: dc94f95504f88010b552f142ec53c9d1
