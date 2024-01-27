@@ -12,6 +12,9 @@ from keras.src.optimizers import Adam
 from tqdm import tqdm
 from pathlib import Path
 import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
+import json
 
 
 # Relating image and emotional state
@@ -120,12 +123,15 @@ def plotting(hist):
     # Saving the plots and metrics
     # convert the history.history dict to a pandas DataFrame:
     hist_df = pd.DataFrame(hist.history)
+    # Convert DataFrame to a list of dictionaries
+    records = hist_df.to_dict(orient='records')
 
     with open(metrics_path + "/plots.csv", mode='w') as f:
         hist_df.to_csv(f, index_label='epoch')
 
     with open(metrics_path + "/scores.json", mode='w') as f:
-        hist_df.to_json(f, orient='records', lines=True)
+        # hist_df.to_json(f, orient='records', lines=True)
+        json.dump(records, f, indent=2)
 
     # Saving training history plot
     plt.figure()
@@ -133,7 +139,8 @@ def plotting(hist):
     plt.xlabel('Epoch')
 
     for k in hist_df.keys():
-        plt.plot(history.history[k], label=k)
+        if k != 'false_positives' and k != 'false_negatives' and k != 'true_positives' and k != 'true_negatives' and k != 'val_false_positives' and k != 'val_false_negatives' and k != 'val_true_positives' and k != 'val_true_negatives':
+            plt.plot(history.history[k], label=k)
 
     plt.legend(loc='best')
     plt.savefig("plots/train_history.png", dpi=150, bbox_inches='tight', pad_inches=0)
