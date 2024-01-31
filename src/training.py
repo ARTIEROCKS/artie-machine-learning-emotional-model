@@ -12,9 +12,6 @@ from keras.src.optimizers import Adam
 from tqdm import tqdm
 from pathlib import Path
 import matplotlib.pyplot as plt
-from sklearn.metrics import confusion_matrix
-import seaborn as sns
-import json
 
 
 # Relating image and emotional state
@@ -120,21 +117,32 @@ def split_for_training(x_all, y_all, t_percentage):
 
 # Function to plot
 def plotting(hist):
+
     # Saving the plots and metrics
     # convert the history.history dict to a pandas DataFrame:
     hist_df = pd.DataFrame(hist.history)
+
     # Convert DataFrame to a list of dictionaries
-    records = hist_df.to_dict(orient='records')
+    metrics_data = {'loss': hist_df['loss'].mean(), 'accuracy': hist_df['accuracy'].mean(),
+                    'precision': hist_df['precision'].mean(), 'recall': hist_df['recall'].mean(),
+                    'val_loss': hist_df['val_loss'].mean(), 'false_positives': hist_df['false_positives'],
+                    'false_negatives': hist_df['false_negatives'].mean(),
+                    'true_positives': hist_df['true_positives'].mean(),
+                    'true_negatives': hist_df['true_negatives'].mean(),
+                    'precision_at_recall': hist_df['precision_at_recall'].mean(),
+                    'sensitivity_at_specificity': hist_df['sensitivity_at_specificity'].mean(),
+                    'specificity_at_sensitivity': hist_df['specificity_at_sensitivity'].mean(),
+                    'mean_io_u': hist_df['mean_io_u']}
+    metrics_df = pd.DataFrame.from_records([metrics_data])
 
     with open(metrics_path + "/plots.csv", mode='w') as f:
         hist_df.to_csv(f, index_label='epoch')
 
     with open(metrics_path + "/scores.json", mode='w') as f:
-        # hist_df.to_json(f, orient='records', lines=True)
-        json.dump(records, f, indent=2)
+        metrics_df.to_json(f)
 
     # Saving training history plot
-    plt.figure(figsize=(780, 780))
+    plt.figure()
     plt.ylabel('Loss / Accuracy')
     plt.xlabel('Epoch')
 

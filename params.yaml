@@ -39,6 +39,6 @@ training:
   model_path: model
   num_labels: 7
   batch_size: 64
-  epochs: 30
+  epochs: 50
   train_percentage: 0.75
   show_summary: false
