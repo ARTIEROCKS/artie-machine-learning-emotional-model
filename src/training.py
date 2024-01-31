@@ -117,15 +117,29 @@ def split_for_training(x_all, y_all, t_percentage):
 
 # Function to plot
 def plotting(hist):
+
     # Saving the plots and metrics
     # convert the history.history dict to a pandas DataFrame:
     hist_df = pd.DataFrame(hist.history)
+
+    # Convert DataFrame to a list of dictionaries
+    metrics_data = {'loss': hist_df['loss'].mean(), 'accuracy': hist_df['accuracy'].mean(),
+                    'precision': hist_df['precision'].mean(), 'recall': hist_df['recall'].mean(),
+                    'val_loss': hist_df['val_loss'].mean(), 'false_positives': hist_df['false_positives'],
+                    'false_negatives': hist_df['false_negatives'].mean(),
+                    'true_positives': hist_df['true_positives'].mean(),
+                    'true_negatives': hist_df['true_negatives'].mean(),
+                    'precision_at_recall': hist_df['precision_at_recall'].mean(),
+                    'sensitivity_at_specificity': hist_df['sensitivity_at_specificity'].mean(),
+                    'specificity_at_sensitivity': hist_df['specificity_at_sensitivity'].mean(),
+                    'mean_io_u': hist_df['mean_io_u']}
+    metrics_df = pd.DataFrame.from_records([metrics_data])
 
     with open(metrics_path + "/plots.csv", mode='w') as f:
         hist_df.to_csv(f, index_label='epoch')
 
     with open(metrics_path + "/scores.json", mode='w') as f:
-        hist_df.to_json(f, orient='records', lines=True)
+        metrics_df.to_json(f)
 
     # Saving training history plot
     plt.figure()
@@ -133,10 +147,11 @@ def plotting(hist):
     plt.xlabel('Epoch')
 
     for k in hist_df.keys():
-        plt.plot(history.history[k], label=k)
+        if k != 'false_positives' and k != 'false_negatives' and k != 'true_positives' and k != 'true_negatives' and k != 'val_false_positives' and k != 'val_false_negatives' and k != 'val_true_positives' and k != 'val_true_negatives':
+            plt.plot(history.history[k], label=k)
 
     plt.legend(loc='best')
-    plt.savefig("plots/train_history.png", dpi=150, bbox_inches='tight', pad_inches=0)
+    plt.savefig("plots/train_history.png", dpi=200, bbox_inches='tight', pad_inches=0)
 
 
 # Loading the parameters
