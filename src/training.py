@@ -134,7 +134,7 @@ def plotting(hist):
         json.dump(records, f, indent=2)
 
     # Saving training history plot
-    plt.figure()
+    plt.figure(figsize=(780, 780))
     plt.ylabel('Loss / Accuracy')
     plt.xlabel('Epoch')
 
@@ -143,7 +143,7 @@ def plotting(hist):
             plt.plot(history.history[k], label=k)
 
     plt.legend(loc='best')
-    plt.savefig("plots/train_history.png", dpi=150, bbox_inches='tight', pad_inches=0)
+    plt.savefig("plots/train_history.png", dpi=200, bbox_inches='tight', pad_inches=0)
 
 
 # Loading the parameters
