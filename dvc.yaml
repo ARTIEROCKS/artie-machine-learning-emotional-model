@@ -28,10 +28,19 @@ stages:
       - training.epochs
       - training.train_percentage
     outs:
-      - model/fer.h5
       - model/fer.json
     metrics:
       - metrics/scores.json:
           cache: true
     plots:
       - metrics/plots.csv
+artifacts:
+  emotional-model:
+    path: model/fer.h5
+    type: model
+    desc: 'Facial Emotion Recognition model'
+    labels:
+      - classification
+      - CNN
+    meta:
+      framework: keras

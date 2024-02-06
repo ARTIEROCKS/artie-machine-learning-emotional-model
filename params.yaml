@@ -40,5 +40,5 @@ training:
   num_labels: 7
   batch_size: 64
   epochs: 50
-  train_percentage: 0.75
+  train_percentage: 0.7
   show_summary: false

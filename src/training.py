@@ -76,7 +76,26 @@ def create_model(n_labels):
     # Compliling the model
     model.compile(loss=categorical_crossentropy,
                   optimizer=Adam(),
-                  metrics=['accuracy', tf.keras.metrics.Precision(), tf.keras.metrics.Recall(thresholds=0)])
+                  metrics=['accuracy',
+                           tf.keras.metrics.Precision(),
+                           tf.keras.metrics.Recall(thresholds=0.5),
+                           tf.keras.metrics.FalsePositives(),
+                           tf.keras.metrics.FalseNegatives(),
+                           tf.keras.metrics.TruePositives(),
+                           tf.keras.metrics.TrueNegatives(),
+                           tf.keras.metrics.PrecisionAtRecall(0.5),
+                           tf.keras.metrics.SensitivityAtSpecificity(0.5),
+                           tf.keras.metrics.SpecificityAtSensitivity(0.5),
+                           tf.keras.metrics.MeanIoU(
+                               n_labels,
+                               name=None,
+                               dtype=None,
+                               ignore_class=None,
+                               sparse_y_true=True,
+                               sparse_y_pred=True,
+                               axis=-1,
+                           )
+                           ])
 
     return model
 
@@ -94,6 +113,45 @@ def split_for_training(x_all, y_all, t_percentage):
     y_train = y_all[:split_index]
     y_test = y_all[split_index:]
     return x_train, x_test, y_train, y_test
+
+
+# Function to plot
+def plotting(hist):
+
+    # Saving the plots and metrics
+    # convert the history.history dict to a pandas DataFrame:
+    hist_df = pd.DataFrame(hist.history)
+
+    # Convert DataFrame to a list of dictionaries
+    metrics_data = {'loss': hist_df['loss'].mean(), 'accuracy': hist_df['accuracy'].mean(),
+                    'precision': hist_df['precision'].mean(), 'recall': hist_df['recall'].mean(),
+                    'val_loss': hist_df['val_loss'].mean(), 'false_positives': hist_df['false_positives'],
+                    'false_negatives': hist_df['false_negatives'].mean(),
+                    'true_positives': hist_df['true_positives'].mean(),
+                    'true_negatives': hist_df['true_negatives'].mean(),
+                    'precision_at_recall': hist_df['precision_at_recall'].mean(),
+                    'sensitivity_at_specificity': hist_df['sensitivity_at_specificity'].mean(),
+                    'specificity_at_sensitivity': hist_df['specificity_at_sensitivity'].mean(),
+                    'mean_io_u': hist_df['mean_io_u']}
+    metrics_df = pd.DataFrame.from_records([metrics_data])
+
+    with open(metrics_path + "/plots.csv", mode='w') as f:
+        hist_df.to_csv(f, index_label='epoch')
+
+    with open(metrics_path + "/scores.json", mode='w') as f:
+        metrics_df.to_json(f)
+
+    # Saving training history plot
+    plt.figure(figsize=(19.2, 10.8))
+    plt.ylabel('Loss / Accuracy')
+    plt.xlabel('Epoch')
+
+    for k in hist_df.keys():
+        if k != 'false_positives' and k != 'false_negatives' and k != 'true_positives' and k != 'true_negatives' and k != 'val_false_positives' and k != 'val_false_negatives' and k != 'val_true_positives' and k != 'val_true_negatives':
+            plt.plot(history.history[k], label=k)
+
+    plt.legend(loc='best')
+    plt.savefig("plots/train_history.png", dpi=100, bbox_inches='tight', pad_inches=0)
 
 
 # Loading the parameters
@@ -184,28 +242,5 @@ if show_summary:
     Path('images').mkdir(parents=True, exist_ok=True)
     tf.keras.utils.plot_model(cnn, to_file='images/model.png', dpi=200)
 
-# Saving the plots and metrics
-# convert the history.history dict to a pandas DataFrame:
-hist_df = pd.DataFrame(history.history)
-
-metrics_data = {'loss': hist_df['loss'].mean(), 'accuracy': hist_df['accuracy'].mean(),
-                'precision': hist_df['precision'].mean(), 'recall': hist_df['recall'].mean(),
-                'val_loss': hist_df['val_loss'].mean()}
-metrics_df = pd.DataFrame.from_records([metrics_data])
-
-with open(metrics_path + "/plots.csv", mode='w') as f:
-    metrics_df.to_csv(f, index_label='epoch')
-
-with open(metrics_path + "/scores.json", mode='w') as f:
-    metrics_df.to_json(f)
-
-# Saving training history plot
-plt.figure()
-plt.ylabel('Loss / Accuracy')
-plt.xlabel('Epoch')
-
-for k in hist_df.keys():
-    plt.plot(history.history[k], label=k)
-
-plt.legend(loc='best')
-plt.savefig("plots/train_history.png", dpi=150, bbox_inches='tight', pad_inches=0)
+# Plotting
+plotting(history)
