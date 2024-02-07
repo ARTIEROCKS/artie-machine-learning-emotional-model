@@ -64,15 +64,15 @@ stages:
     params:
       params.yaml:
         training.batch_size: 64
-        training.epochs: 50
-        training.train_percentage: 0.7
+        training.epochs: 100
+        training.train_percentage: 0.75
     outs:
     - path: metrics/plots.csv
-      md5: fe28d1e5b6d3b91fc50adc7414a3e82a
-      size: 18814
+      md5: 56f5d5bf0be3b222d9e34530d1685b7d
+      size: 37124
     - path: metrics/scores.json
-      md5: 8223535aa2ab750c67675cd91245f2e3
-      size: 1907
+      md5: 15b77a9df098273f22047d557e75cdc4
+      size: 3406
     - path: model/fer.json
       md5: dc94f95504f88010b552f142ec53c9d1
       size: 9087
