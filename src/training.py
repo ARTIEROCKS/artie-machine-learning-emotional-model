@@ -234,7 +234,7 @@ history = cnn.fit(X_train, Y_train,
 fer_json = cnn.to_json()
 with open(model_path + "/fer.json", "w") as json_file:
     json_file.write(fer_json)
-cnn.save_weights(model_path + "/fer.h5")
+cnn.save(model_path + "/fer.h5")
 
 # If we want to show the summary
 if show_summary:
