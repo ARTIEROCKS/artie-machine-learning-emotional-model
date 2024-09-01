@@ -20,6 +20,8 @@ class Layer(Enum):
     BATCHNORMALIZATION = 2
     MAXPOOLING2D = 3
     DROPOUT = 4
+    FLATTEN = 5
+    DENSE = 6
 
 
 # Relating image and emotional state
@@ -48,13 +50,15 @@ def relate_image_emotional_state(emotion_df, normalized_path, n_labels):
 # Function to generate the model
 def create_model(n_labels, layers=None, values=None):
     if layers is None:
-        layers = [Layer.CONV2D, Layer.MAXPOOLING2D, Layer.DROPOUT,
+        layers = [Layer.CONV2D, Layer.CONV2D, Layer.MAXPOOLING2D, Layer.DROPOUT,
                   Layer.CONV2D, Layer.CONV2D, Layer.MAXPOOLING2D, Layer.DROPOUT,
-                  Layer.CONV2D, Layer.CONV2D, Layer.MAXPOOLING2D, Layer.DROPOUT]
+                  Layer.CONV2D, Layer.CONV2D, Layer.MAXPOOLING2D, Layer.DROPOUT,
+                  Layer.DENSE, Layer.DROPOUT, Layer.DENSE, Layer.DROPOUT, Layer.DENSE]
     if values is None:
         values = [[64,3,3,'relu'],[64,3,3,'relu'],[2,2,2,2],[0.5],
                   [64,3,3,'relu'],[64,3,3,'relu'],[2,2,2,2],[0.5],
-                  [128,3,3,'relu'],[128,3,3,'relu'],[2,2,2,2],[0.5]]
+                  [128,3,3,'relu'],[128,3,3,'relu'],[2,2,2,2],[0.5],
+                  [], [1024, 'relu'], [0.2], [1024, 'relu'], [0.2], [7,'softmax']]
 
 
     input_size = (48, 48, 1)
@@ -76,18 +80,12 @@ def create_model(n_labels, layers=None, values=None):
             model.add(BatchNormalization())
         elif layer == Layer.DROPOUT:
             model.add(Dropout(values[value_number][0]))
+        elif layer == Layer.FLATTEN:
+            model.add(Flatten())
+        elif layer == Layer.DENSE:
+            model.add(Dense(values[value_number][0], activation=values[value_number][1]))
 
         value_number+=1
-
-    model.add(Flatten())
-
-    # fully connected neural networks
-    model.add(Dense(1024, activation='relu'))
-    model.add(Dropout(0.2))
-    model.add(Dense(1024, activation='relu'))
-    model.add(Dropout(0.2))
-
-    model.add(Dense(n_labels, activation='softmax'))
 
     # Compliling the model
     model.compile(loss=categorical_crossentropy,
