@@ -6,12 +6,20 @@ import cv2
 import numpy as np
 import pandas as pd
 from keras import Sequential
-from keras.src.layers import Conv2D, MaxPooling2D, Dropout, Flatten, Dense
+from keras.src.layers import Conv2D, MaxPooling2D, Dropout, Flatten, Dense, BatchNormalization
 from keras.src.losses import categorical_crossentropy
 from keras.src.optimizers import Adam
 from tqdm import tqdm
 from pathlib import Path
 import matplotlib.pyplot as plt
+from enum import Enum
+
+# Enum for creating the model
+class Layer(Enum):
+    CONV2D = 1
+    BATCHNORMALIZATION = 2
+    MAXPOOLING2D = 3
+    DROPOUT = 4
 
 
 # Relating image and emotional state
@@ -38,30 +46,38 @@ def relate_image_emotional_state(emotion_df, normalized_path, n_labels):
 
 
 # Function to generate the model
-def create_model(n_labels):
+def create_model(n_labels, layers=None, values=None):
+    if layers is None:
+        layers = [Layer.CONV2D, Layer.MAXPOOLING2D, Layer.DROPOUT,
+                  Layer.CONV2D, Layer.CONV2D, Layer.MAXPOOLING2D, Layer.DROPOUT,
+                  Layer.CONV2D, Layer.CONV2D, Layer.MAXPOOLING2D, Layer.DROPOUT]
+    if values is None:
+        values = [[64,3,3,'relu'],[64,3,3,'relu'],[2,2,2,2],[0.5],
+                  [64,3,3,'relu'],[64,3,3,'relu'],[2,2,2,2],[0.5],
+                  [128,3,3,'relu'],[128,3,3,'relu'],[2,2,2,2],[0.5]]
+
+
     input_size = (48, 48, 1)
 
-    # 1st convolution layer
     model = Sequential()
+    value_number = 0
 
-    model.add(Conv2D(64, kernel_size=(3, 3), activation='relu', input_shape=input_size))
-    model.add(Conv2D(64, kernel_size=(3, 3), activation='relu'))
-    # model.add(BatchNormalization())
-    model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
-    model.add(Dropout(0.5))
+    #Performing the convolution layers
+    for layer in layers:
+        if layer == Layer.CONV2D:
+            if value_number > 0:
+                model.add(Conv2D(values[value_number][0], kernel_size=(values[value_number][1], values[value_number][2]), activation=values[value_number][3]))
+            else:
+                model.add(Conv2D(values[value_number][0], kernel_size=(values[value_number][1], values[value_number][2]), activation=values[value_number][3],
+                                 input_shape=input_size))
+        elif layer == Layer.MAXPOOLING2D:
+            model.add(MaxPooling2D(pool_size=(values[value_number][0], values[value_number][1]), strides=(values[value_number][2], values[value_number][3])))
+        elif layer == Layer.BATCHNORMALIZATION:
+            model.add(BatchNormalization())
+        elif layer == Layer.DROPOUT:
+            model.add(Dropout(values[value_number][0]))
 
-    # 2nd convolution layer
-    model.add(Conv2D(64, (3, 3), activation='relu'))
-    model.add(Conv2D(64, (3, 3), activation='relu'))
-    # model.add(BatchNormalization())
-    model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
-    model.add(Dropout(0.5))
-
-    # 3rd convolution layer
-    model.add(Conv2D(128, (3, 3), activation='relu'))
-    model.add(Conv2D(128, (3, 3), activation='relu'))
-    # model.add(BatchNormalization())
-    model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
+        value_number+=1
 
     model.add(Flatten())
 
@@ -174,6 +190,10 @@ train_percentage = params['training']['train_percentage']
 show_summary = params['training']['show_summary']
 metrics_path = params['training']['metrics_path']
 
+# Getting the FCNN structure parameters
+structure_layers = [Layer[layer] for layer in params['training']['structure_layers']]
+structure_values = params['training']['structure_values']
+
 # Creates the needed directories
 Path(model_path).mkdir(parents=True, exist_ok=True)
 Path(metrics_path).mkdir(parents=True, exist_ok=True)
@@ -220,7 +240,7 @@ X_train = X_train.reshape(X_train.shape[0], 48, 48, 1)
 X_test = X_test.reshape(X_test.shape[0], 48, 48, 1)
 
 # Getting the model
-cnn = create_model(7)
+cnn = create_model(n_labels=num_labels, layers=structure_layers, values=structure_values)
 
 # Training the model
 history = cnn.fit(X_train, Y_train,

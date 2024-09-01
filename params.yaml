@@ -42,3 +42,29 @@ training:
   epochs: 100
   train_percentage: 0.75
   show_summary: false
+  structure_layers:
+    - CONV2D
+    - CONV2D
+    - MAXPOOLING2D
+    - DROPOUT
+    - CONV2D
+    - CONV2D
+    - MAXPOOLING2D
+    - DROPOUT
+    - CONV2D
+    - CONV2D
+    - MAXPOOLING2D
+    - DROPOUT
+  structure_values:
+    - [ 64,3,3,'relu' ]
+    - [ 64,3,3,'relu' ]
+    - [ 2,2,2,2 ]
+    - [ 0.5 ]
+    - [ 64,3,3,'relu' ]
+    - [ 64,3,3,'relu' ]
+    - [ 2,2,2,2 ]
+    - [ 0.5 ]
+    - [ 128,3,3,'relu' ]
+    - [ 128,3,3,'relu' ]
+    - [ 2,2,2,2 ]
+    - [ 0.5 ]
