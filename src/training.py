@@ -70,10 +70,10 @@ def create_model(n_labels, layers=None, values=None):
     for layer in layers:
         if layer == Layer.CONV2D:
             if value_number > 0:
-                model.add(Conv2D(values[value_number][0], kernel_size=(values[value_number][1], values[value_number][2]), activation=values[value_number][3]))
+                model.add(Conv2D(values[value_number][0], kernel_size=(values[value_number][1], values[value_number][2]), activation=values[value_number][3], padding=values[value_number][4]))
             else:
                 model.add(Conv2D(values[value_number][0], kernel_size=(values[value_number][1], values[value_number][2]), activation=values[value_number][3],
-                                 input_shape=input_size))
+                                 input_shape=input_size, padding=values[value_number][4]))
         elif layer == Layer.MAXPOOLING2D:
             model.add(MaxPooling2D(pool_size=(values[value_number][0], values[value_number][1]), strides=(values[value_number][2], values[value_number][3])))
         elif layer == Layer.BATCHNORMALIZATION:
