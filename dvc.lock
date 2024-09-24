@@ -1,7 +1,7 @@
 schema: '2.0'
 stages:
   download:
-    cmd: python src/download.py params.yaml
+    cmd: python3 src/download.py params.yaml
     outs:
     - path: data/CK+
       md5: e1c8b38aa6b547b44be89d1ae6bdd233.dir
@@ -23,7 +23,7 @@ stages:
       size: 166163587
       nfiles: 413
   data_augmentation:
-    cmd: python src/bilstm_data_augmentation.py params.yaml
+    cmd: python3 src/bilstm_data_augmentation.py params.yaml
     deps:
     - path: data/CK+
       md5: e1c8b38aa6b547b44be89d1ae6bdd233.dir
@@ -43,7 +43,7 @@ stages:
       size: 148581874
       nfiles: 2616
   normalization:
-    cmd: python src/normalization.py params.yaml
+    cmd: python3 src/normalization.py params.yaml
     deps:
     - path: data/CK_Augmented/CK+_augmented
       md5: 1d20a9027b0ab0b5e5b1c23297636f6d.dir
@@ -55,7 +55,7 @@ stages:
       size: 106715976
       nfiles: 64155
   training:
-    cmd: python src/training.py params.yaml
+    cmd: python3 src/training.py params.yaml
     deps:
     - path: data/normalization
       md5: ad61a5174dde85bf22425674e50130ed.dir
@@ -65,14 +65,89 @@ stages:
       params.yaml:
         training.batch_size: 64
         training.epochs: 100
+        training.structure_layers:
+        - CONV2D
+        - CONV2D
+        - MAXPOOLING2D
+        - DROPOUT
+        - CONV2D
+        - MAXPOOLING2D
+        - DROPOUT
+        - CONV2D
+        - MAXPOOLING2D
+        - DROPOUT
+        - CONV2D
+        - MAXPOOLING2D
+        - DROPOUT
+        - FLATTEN
+        - DENSE
+        - DROPOUT
+        - DENSE
+        - DROPOUT
+        - DENSE
+        training.structure_values:
+        - - 64
+          - 3
+          - 3
+          - relu
+          - valid
+        - - 64
+          - 3
+          - 3
+          - relu
+          - valid
+        - - 2
+          - 2
+          - 2
+          - 2
+        - - 0.5
+        - - 64
+          - 3
+          - 3
+          - relu
+          - valid
+        - - 2
+          - 2
+          - 2
+          - 2
+        - - 0.5
+        - - 128
+          - 3
+          - 3
+          - relu
+          - valid
+        - - 2
+          - 2
+          - 2
+          - 2
+        - - 0.5
+        - - 256
+          - 2
+          - 2
+          - relu
+          - valid
+        - - 2
+          - 2
+          - 2
+          - 2
+        - - 0.5
+        - []
+        - - 1024
+          - relu
+        - - 0.2
+        - - 1024
+          - relu
+        - - 0.2
+        - - 7
+          - softmax
         training.train_percentage: 0.75
     outs:
     - path: metrics/plots.csv
-      md5: f235f78f50dc2c5f205e28e1bffac901
-      size: 37079
+      md5: 79777ae87963a56e45b7a543081fdb99
+      size: 37158
     - path: metrics/scores.json
-      md5: fab2553935e7803e5991012c6fec89d2
-      size: 3406
+      md5: 34ff59f2aff437d1415bc8cd3f064df2
+      size: 3405
     - path: model/fer.json
-      md5: dc94f95504f88010b552f142ec53c9d1
-      size: 9087
+      md5: aa2c82587f7a72639f2e40c97773fc4d
+      size: 9118

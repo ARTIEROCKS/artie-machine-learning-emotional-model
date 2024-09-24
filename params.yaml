@@ -39,7 +39,7 @@ training:
   model_path: model
   num_labels: 7
   batch_size: 64
-  epochs: 10
+  epochs: 100
   train_percentage: 0.75
   show_summary: true
   structure_layers:
@@ -48,10 +48,11 @@ training:
   - MAXPOOLING2D
   - DROPOUT
   - CONV2D
-  - CONV2D
   - MAXPOOLING2D
   - DROPOUT
   - CONV2D
+  - MAXPOOLING2D
+  - DROPOUT
   - CONV2D
   - MAXPOOLING2D
   - DROPOUT
@@ -66,10 +67,12 @@ training:
     - 3
     - 3
     - relu
+    - valid
   - - 64
     - 3
     - 3
     - relu
+    - valid
   - - 2
     - 2
     - 2
@@ -79,10 +82,7 @@ training:
     - 3
     - 3
     - relu
-  - - 64
-    - 3
-    - 3
-    - relu
+    - valid
   - - 2
     - 2
     - 2
@@ -92,10 +92,17 @@ training:
     - 3
     - 3
     - relu
-  - - 128
-    - 3
-    - 3
+    - valid
+  - - 2
+    - 2
+    - 2
+    - 2
+  - - 0.5
+  - - 256
+    - 2
+    - 2
     - relu
+    - valid
   - - 2
     - 2
     - 2
