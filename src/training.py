@@ -9,6 +9,7 @@ from keras import Sequential
 from keras.src.layers import Conv2D, MaxPooling2D, Dropout, Flatten, Dense, BatchNormalization
 from keras.src.losses import categorical_crossentropy
 from keras.src.optimizers import Adam
+from tensorflow.python.layers.pooling import AvgPool2D
 from tqdm import tqdm
 from pathlib import Path
 import matplotlib.pyplot as plt
@@ -19,9 +20,10 @@ class Layer(Enum):
     CONV2D = 1
     BATCHNORMALIZATION = 2
     MAXPOOLING2D = 3
-    DROPOUT = 4
-    FLATTEN = 5
-    DENSE = 6
+    AVGPOOLING2D = 4
+    DROPOUT = 5
+    FLATTEN = 6
+    DENSE = 7
 
 
 # Relating image and emotional state
@@ -76,6 +78,8 @@ def create_model(n_labels, layers=None, values=None):
                                  input_shape=input_size, padding=values[value_number][4]))
         elif layer == Layer.MAXPOOLING2D:
             model.add(MaxPooling2D(pool_size=(values[value_number][0], values[value_number][1]), strides=(values[value_number][2], values[value_number][3])))
+        elif layer == Layer.AVGPOOLING2D:
+            model.add(AvgPool2D(pool_size=(values[value_number][0], values[value_number][1]), strides=(values[value_number][2], values[value_number][3])))
         elif layer == Layer.BATCHNORMALIZATION:
             model.add(BatchNormalization())
         elif layer == Layer.DROPOUT:
@@ -149,8 +153,11 @@ def plotting(hist):
                     'mean_io_u': hist_df['mean_io_u']}
     metrics_df = pd.DataFrame.from_records([metrics_data])
 
-    with open(metrics_path + "/plots.csv", mode='w') as f:
-        hist_df.to_csv(f, index_label='epoch')
+    # Save each metric individually in its own CSV file
+    for metric in hist_df.columns:
+        metric_data = hist_df[[metric]]  # Select the metric
+        metric_file_name = f"{metrics_path}/{metric}.csv"  # Assign the CSV file name
+        metric_data.to_csv(metric_file_name, index_label='epoch')  # Save the metric in a CSV file
 
     with open(metrics_path + "/scores.json", mode='w') as f:
         metrics_df.to_json(f)

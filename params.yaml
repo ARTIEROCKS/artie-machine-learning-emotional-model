@@ -39,23 +39,16 @@ training:
   model_path: model
   num_labels: 7
   batch_size: 64
-  epochs: 100
+  epochs: 2
   train_percentage: 0.75
   show_summary: true
   structure_layers:
   - CONV2D
-  - CONV2D
   - MAXPOOLING2D
-  - DROPOUT
   - CONV2D
-  - MAXPOOLING2D
-  - DROPOUT
+  - AVGPOOLING2D
   - CONV2D
-  - MAXPOOLING2D
-  - DROPOUT
-  - CONV2D
-  - MAXPOOLING2D
-  - DROPOUT
+  - AVGPOOLING2D
   - FLATTEN
   - DENSE
   - DROPOUT
@@ -63,57 +56,41 @@ training:
   - DROPOUT
   - DENSE
   structure_values:
+  - - 32
+    - 42
+    - 42
+    - relu
+    - same
+  - - 21
+    - 21
+    - 2
+    - 2
+  - - 32
+    - 21
+    - 21
+    - relu
+    - same
+  - - 10
+    - 10
+    - 2
+    - 2
   - - 64
-    - 3
-    - 3
+    - 10
+    - 10
     - relu
-    - valid
-  - - 64
-    - 3
-    - 3
-    - relu
-    - valid
-  - - 2
+    - same
+  - - 5
+    - 5
     - 2
     - 2
-    - 2
-  - - 0.5
-  - - 64
-    - 3
-    - 3
-    - relu
-    - valid
-  - - 2
-    - 2
-    - 2
-    - 2
-  - - 0.5
-  - - 128
-    - 3
-    - 3
-    - relu
-    - valid
-  - - 2
-    - 2
-    - 2
-    - 2
-  - - 0.5
-  - - 256
-    - 2
-    - 2
-    - relu
-    - valid
-  - - 2
-    - 2
-    - 2
-    - 2
-  - - 0.5
   - []
-  - - 1024
+  - - 3072
     - relu
-  - - 0.2
-  - - 1024
+    - same
+  - - 0.5
+  - - 3072
     - relu
-  - - 0.2
+    - valid
+  - - 0.5
   - - 7
     - softmax
