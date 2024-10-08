@@ -40,6 +40,7 @@ training:
   num_labels: 7
   batch_size: 64
   epochs: 2
+  early_stopping_patience: 10
   train_percentage: 0.75
   show_summary: true
   structure_layers:

@@ -10,6 +10,7 @@ from keras.src.layers import Conv2D, MaxPooling2D, Dropout, Flatten, Dense, Batc
 from keras.src.losses import categorical_crossentropy
 from keras.src.optimizers import Adam
 from tensorflow.python.layers.pooling import AvgPool2D
+from tensorflow.keras.callbacks import EarlyStopping
 from tqdm import tqdm
 from pathlib import Path
 import matplotlib.pyplot as plt
@@ -189,6 +190,7 @@ model_path = params['training']['model_path']
 num_labels = params['training']['num_labels']
 batch_size = params['training']['batch_size']
 epochs = params['training']['epochs']
+early_stopping_patience = params['training']['early_stopping_patience']
 width, height = 48, 48
 train_percentage = params['training']['train_percentage']
 
@@ -247,13 +249,21 @@ X_test = X_test.reshape(X_test.shape[0], 48, 48, 1)
 # Getting the model
 cnn = create_model(n_labels=num_labels, layers=structure_layers, values=structure_values)
 
+# Implementing early stopping
+early_stopping = EarlyStopping(
+    monitor='val_loss',   # Loss validation monitoring
+    patience=early_stopping_patience,
+    restore_best_weights=True  # Restores best weights
+)
+
 # Training the model
 history = cnn.fit(X_train, Y_train,
                   batch_size=batch_size,
                   epochs=epochs,
                   verbose=1,
                   validation_data=(X_test, Y_test),
-                  shuffle=True)
+                  shuffle=True,
+                  callbacks=[early_stopping])
 
 # Saving the  model to  use it later on
 fer_json = cnn.to_json()
