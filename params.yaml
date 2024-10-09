@@ -42,7 +42,14 @@ training:
   epochs: 2
   early_stopping_patience: 10
   train_percentage: 0.75
+  learning_rate: 0.001
+  optimizer: ADAM
+  transfer_learning: false
   show_summary: true
+  input_layer:
+    - 48
+    - 48
+    - 1
   structure_layers:
   - CONV2D
   - MAXPOOLING2D
