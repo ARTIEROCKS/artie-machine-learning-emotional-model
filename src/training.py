@@ -116,7 +116,7 @@ def create_transfer_learning_model(height, width, channels):
     return model
 
 # Function to generate the model
-def create_model(n_labels, layers=None, values=None):
+def create_model(n_labels, layers=None, values=None, f_optimizer=None):
     if layers is None:
         layers = [Layer.CONV2D, Layer.CONV2D, Layer.MAXPOOLING2D, Layer.DROPOUT,
                   Layer.CONV2D, Layer.CONV2D, Layer.MAXPOOLING2D, Layer.DROPOUT,
@@ -157,9 +157,12 @@ def create_model(n_labels, layers=None, values=None):
 
         value_number+=1
 
+    if f_optimizer is None:
+        f_optimizer = Adam()
+
     # Compliling the model
     model.compile(loss=categorical_crossentropy,
-                  optimizer=Adam(),
+                  optimizer=f_optimizer,
                   metrics=['accuracy',
                            tf.keras.metrics.Precision(),
                            tf.keras.metrics.Recall(thresholds=0.5),
@@ -317,10 +320,9 @@ X_test = X_test.reshape(X_test.shape[0], height, width, channels)
 if transfer_learning:
     cnn = create_transfer_learning_model()
 else:
-    cnn = create_model(n_labels=num_labels, layers=structure_layers, values=structure_values)
-
-# Generates the optimizer
-optimizer = create_optimizer(optimizer, learning_rate)
+    # Generates the optimizer
+    f_optimizer = create_optimizer(optimizer, learning_rate)
+    cnn = create_model(n_labels=num_labels, layers=structure_layers, values=structure_values, f_optimizer=f_optimizer)
 
 # Implementing early stopping
 early_stopping = EarlyStopping(
@@ -333,7 +335,6 @@ early_stopping = EarlyStopping(
 history = cnn.fit(X_train, Y_train,
                   batch_size=batch_size,
                   epochs=epochs,
-                  optimizer=optimizer,
                   verbose=1,
                   validation_data=(X_test, Y_test),
                   shuffle=True,
