@@ -71,11 +71,14 @@ stages:
         - MAXPOOLING2D
         - DROPOUT
         - CONV2D
-        - MAXPOOLING2D
-        - DROPOUT
         - CONV2D
         - MAXPOOLING2D
         - DROPOUT
+        - CONV2D
+        - CONV2D
+        - MAXPOOLING2D
+        - DROPOUT
+        - CONV2D
         - CONV2D
         - MAXPOOLING2D
         - DROPOUT
@@ -90,12 +93,12 @@ stages:
           - 3
           - 3
           - relu
-          - valid
+          - same
         - - 64
           - 3
           - 3
           - relu
-          - valid
+          - same
         - - 2
           - 2
           - 2
@@ -105,7 +108,12 @@ stages:
           - 3
           - 3
           - relu
-          - valid
+          - same
+        - - 64
+          - 3
+          - 3
+          - relu
+          - same
         - - 2
           - 2
           - 2
@@ -115,7 +123,12 @@ stages:
           - 3
           - 3
           - relu
-          - valid
+          - same
+        - - 128
+          - 3
+          - 3
+          - relu
+          - same
         - - 2
           - 2
           - 2
@@ -125,7 +138,12 @@ stages:
           - 2
           - 2
           - relu
-          - valid
+          - same
+        - - 256
+          - 2
+          - 2
+          - relu
+          - same
         - - 2
           - 2
           - 2
@@ -138,16 +156,52 @@ stages:
         - - 1024
           - relu
         - - 0.2
-        - - 7
+        - - 8
           - softmax
         training.train_percentage: 0.75
     outs:
-    - path: metrics/plots.csv
-      md5: 79777ae87963a56e45b7a543081fdb99
-      size: 37158
+    - path: metrics/accuracy.csv
+      md5: ad7c071e2bf51be8ca374fc3d43c8b87
+      size: 257
+    - path: metrics/false_negatives.csv
+      md5: 6b9d8943f6d461957219263a18a009ad
+      size: 133
+    - path: metrics/false_positives.csv
+      md5: b13e33ff6a4948492feeef1ff5153f63
+      size: 90
+    - path: metrics/loss.csv
+      md5: 244dc0ff9b1a1c0a673c0465468d17a8
+      size: 240
+    - path: metrics/mean_io_u.csv
+      md5: ba3d1f1d5ddf63a6f64dc415564e5abc
+      size: 116
+    - path: metrics/precision.csv
+      md5: 62d90642f2b113aa8580781f80c3f84c
+      size: 99
+    - path: metrics/precision_at_recall.csv
+      md5: 272e773d4acf871d55b233144ab26b39
+      size: 267
+    - path: metrics/recall.csv
+      md5: 7e4b90b1ad0408ae73514838a69e1023
+      size: 98
     - path: metrics/scores.json
-      md5: 34ff59f2aff437d1415bc8cd3f064df2
-      size: 3405
+      md5: e2e818d150191f935c44cecd3c198f3d
+      size: 659
+    - path: metrics/sensitivity_at_specificity.csv
+      md5: 729e05ab6da3201d114dd894d789f23f
+      size: 264
+    - path: metrics/specificity_at_sensitivity.csv
+      md5: 86f889301b3bf6c74f91f87d965d4eb8
+      size: 262
+    - path: metrics/true_negatives.csv
+      md5: 4e7421f415c063fbc854a59fc48287a6
+      size: 143
+    - path: metrics/true_positives.csv
+      md5: ec7a09523f743c8dc7264585c5d66c48
+      size: 88
+    - path: metrics/val_loss.csv
+      md5: 6b0ca3e8a855b736e77d8caa45ada79e
+      size: 246
     - path: model/fer.json
-      md5: aa2c82587f7a72639f2e40c97773fc4d
-      size: 9118
+      md5: 547857bd392f425869c6de0192ea6c4a
+      size: 11449
