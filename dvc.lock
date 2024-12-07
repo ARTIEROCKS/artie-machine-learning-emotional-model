@@ -138,16 +138,52 @@ stages:
         - - 1024
           - relu
         - - 0.2
-        - - 7
+        - - 8
           - softmax
         training.train_percentage: 0.75
     outs:
-    - path: metrics/plots.csv
-      md5: 79777ae87963a56e45b7a543081fdb99
-      size: 37158
+    - path: metrics/accuracy.csv
+      md5: 0765dfb746046cfdc27290d80c966718
+      size: 757
+    - path: metrics/false_negatives.csv
+      md5: 24fd62ed0845c7396dbb1c30cab7dd4e
+      size: 386
+    - path: metrics/false_positives.csv
+      md5: 20cd97c038c09b38b354ddb119e3b51c
+      size: 350
+    - path: metrics/loss.csv
+      md5: 49dbf27cf7f5229edee8e8cff438bb94
+      size: 743
+    - path: metrics/mean_io_u.csv
+      md5: cd66e7ee4d236373356368ec2b08f362
+      size: 346
+    - path: metrics/precision.csv
+      md5: 60a2ec55be0f7587d0e0f94918ad4045
+      size: 748
+    - path: metrics/precision_at_recall.csv
+      md5: 019003a94751f9fd3b5cc7732a8f7e07
+      size: 769
+    - path: metrics/recall.csv
+      md5: 9f42f4d0125ff6c03b80203e95de15e6
+      size: 767
     - path: metrics/scores.json
-      md5: 34ff59f2aff437d1415bc8cd3f064df2
-      size: 3405
+      md5: 35414ac09fd6d100e2bc06d3ba99477e
+      size: 1244
+    - path: metrics/sensitivity_at_specificity.csv
+      md5: 437a3b3f15cfe0d82cc015e4f6b0914c
+      size: 767
+    - path: metrics/specificity_at_sensitivity.csv
+      md5: 34622ad8c71cbed946dd3e0792d5ffa7
+      size: 768
+    - path: metrics/true_negatives.csv
+      md5: c0dbf83aec9ffc2615f35217a4e38f3a
+      size: 419
+    - path: metrics/true_positives.csv
+      md5: 3163e1729be5a244db5aff10ca16bcab
+      size: 379
+    - path: metrics/val_loss.csv
+      md5: 1531e65364b3034ada66607bfe3e380c
+      size: 749
     - path: model/fer.json
-      md5: aa2c82587f7a72639f2e40c97773fc4d
+      md5: 52ceb9895b86d50f2e434e42c9e56e0d
       size: 9118
