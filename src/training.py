@@ -81,7 +81,7 @@ def create_optimizer(o, lr):
     return new_optimizer
 
 # Function to do transfer learning
-def create_transfer_learning_model(height, width, channels):
+def create_transfer_learning_model(height=48, width=48, channels=1):
     # Load the VGG16 model without the top layers (include_top=False)
     vgg_base = VGG16(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
 
@@ -318,7 +318,7 @@ X_test = X_test.reshape(X_test.shape[0], height, width, channels)
 
 # Getting the model
 if transfer_learning:
-    cnn = create_transfer_learning_model()
+    cnn = create_transfer_learning_model(height, width, channels)
 else:
     # Generates the optimizer
     f_optimizer = create_optimizer(optimizer, learning_rate)
