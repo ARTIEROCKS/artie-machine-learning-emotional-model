@@ -1,12 +1,12 @@
 stages:
   download:
-    cmd: python src/download.py params.yaml
+    cmd: python3 src/download.py params.yaml
     outs:
       - data/CK+
       - data/FER2013
       - data/LirisChildren
   data_augmentation:
-    cmd: python src/bilstm_data_augmentation.py params.yaml
+    cmd: python3 src/bilstm_data_augmentation.py params.yaml
     outs:
       - data/CK_Augmented/CK+_augmented
     deps:
@@ -14,26 +14,40 @@ stages:
       - data/FER2013
       - data/LirisChildren
   normalization:
-    cmd: python src/normalization.py params.yaml
+    cmd: python3 src/normalization.py params.yaml
     deps:
       - data/CK_Augmented/CK+_augmented
     outs:
       - data/normalization
   training:
-    cmd: python src/training.py params.yaml
+    cmd: python3 src/training.py params.yaml
     deps:
       - data/normalization
     params:
       - training.batch_size
       - training.epochs
       - training.train_percentage
+      - training.structure_layers
+      - training.structure_values
     outs:
       - model/fer.json
     metrics:
       - metrics/scores.json:
           cache: true
     plots:
-      - metrics/plots.csv
+      - metrics/loss.csv
+      - metrics/accuracy.csv
+      - metrics/precision.csv
+      - metrics/recall.csv
+      - metrics/val_loss.csv
+      - metrics/false_positives.csv
+      - metrics/false_negatives.csv
+      - metrics/true_positives.csv
+      - metrics/true_negatives.csv
+      - metrics/precision_at_recall.csv
+      - metrics/sensitivity_at_specificity.csv
+      - metrics/specificity_at_sensitivity.csv
+      - metrics/mean_io_u.csv
 artifacts:
   emotional-model:
     path: model/fer.h5
