@@ -37,26 +37,32 @@ training:
   emotion_csv_file: data/normalization/emotions.csv
   metrics_path: metrics
   model_path: model
-  num_labels: 7
+  num_labels: 8
   batch_size: 64
-  epochs: 2
-  early_stopping_patience: 10
-  train_percentage: 0.75
+  epochs: 500
+  early_stopping_patience: 30
+  train_percentage: 0.7
   learning_rate: 0.001
   optimizer: ADAM
   transfer_learning: false
   show_summary: true
   input_layer:
-    - 48
-    - 48
-    - 1
+  - 48
+  - 48
+  - 1
   structure_layers:
   - CONV2D
+  - CONV2D
   - MAXPOOLING2D
+  - DROPOUT
   - CONV2D
-  - AVGPOOLING2D
   - CONV2D
-  - AVGPOOLING2D
+  - MAXPOOLING2D
+  - DROPOUT
+  - CONV2D
+  - CONV2D
+  - MAXPOOLING2D
+  - DROPOUT
   - FLATTEN
   - DENSE
   - DROPOUT
@@ -64,41 +70,59 @@ training:
   - DROPOUT
   - DENSE
   structure_values:
-  - - 32
-    - 42
-    - 42
-    - relu
-    - same
-  - - 21
-    - 21
-    - 2
-    - 2
-  - - 32
-    - 21
-    - 21
-    - relu
-    - same
-  - - 10
-    - 10
-    - 2
-    - 2
   - - 64
-    - 10
-    - 10
+    - 3
+    - 3
     - relu
     - same
-  - - 5
-    - 5
+  - - 64
+    - 3
+    - 3
+    - relu
+    - same
+  - - 2
     - 2
     - 2
+    - 2
+  - - 0.5
+  - - 64
+    - 3
+    - 3
+    - relu
+    - same
+  - - 64
+    - 3
+    - 3
+    - relu
+    - same
+  - - 2
+    - 2
+    - 2
+    - 2
+  - - 0.5
+  - - 128
+    - 3
+    - 3
+    - relu
+    - same
+  - - 128
+    - 3
+    - 3
+    - relu
+    - same
+  - - 2
+    - 2
+    - 2
+    - 2
+  - - 0.5
   - []
-  - - 3072
+  - - 1024
     - relu
     - same
-  - - 0.5
-  - - 3072
+  - - 0.2
+  - - 1024
     - relu
-    - valid
-  - - 0.5
-  - - 7
+    - same
+  - - 0.2
+  - - 8
     - softmax
