@@ -6,23 +6,40 @@ import cv2
 import numpy as np
 import pandas as pd
 from keras import Sequential
-from keras.src.layers import Conv2D, MaxPooling2D, Dropout, Flatten, Dense, BatchNormalization
+from keras.src.layers import Conv2D, MaxPooling2D, Dropout, Flatten, Dense, BatchNormalization, Input
 from keras.src.losses import categorical_crossentropy
 from keras.src.optimizers import Adam
+from tensorflow.python.layers.pooling import AvgPool2D
+from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.applications import VGG16
+from tensorflow.keras.models import Model
+from tensorflow.keras.optimizers import Adam, SGD, RMSprop, Adagrad, Nadam
 from tqdm import tqdm
 from pathlib import Path
 import matplotlib.pyplot as plt
 from enum import Enum
+
+# Enum for the optimizers
+class Optimizer(Enum):
+    ADAM = 1
+    SGD = 2
+    RMS = 3
+    ADAGRAD = 4
+    NADAM = 5
 
 # Enum for creating the model
 class Layer(Enum):
     CONV2D = 1
     BATCHNORMALIZATION = 2
     MAXPOOLING2D = 3
-    DROPOUT = 4
-    FLATTEN = 5
-    DENSE = 6
+    AVGPOOLING2D = 4
+    DROPOUT = 5
+    FLATTEN = 6
+    DENSE = 7
 
+# Function to replicate grayscale images into 3 channels (RGB-like input)
+def replicate_channels(x):
+    return tf.keras.backend.repeat_elements(x, rep=3, axis=-1)
 
 # Relating image and emotional state
 def relate_image_emotional_state(emotion_df, normalized_path, n_labels):
@@ -46,9 +63,60 @@ def relate_image_emotional_state(emotion_df, normalized_path, n_labels):
 
     return x, y
 
+# Function to generate the optimizer
+def create_optimizer(o, lr):
+    if o == Optimizer.ADAM:
+        new_optimizer = Adam(learning_rate=lr)
+    elif o == Optimizer.SGD:
+        new_optimizer = SGD(learning_rate=lr)
+    elif o == Optimizer.RMS:
+        new_optimizer = RMSprop(learning_rate=lr)
+    elif o == Optimizer.ADAGRAD:
+        new_optimizer = Adagrad(learning_rate=lr)
+    elif o == Optimizer.NADAM:
+        new_optimizer = Nadam(learning_rate=lr)
+    else:
+        new_optimizer = Adam(learning_rate=lr)
+
+    return new_optimizer
+
+# Function to do transfer learning
+def create_transfer_learning_model(height=48, width=48, channels=1):
+    # Load the VGG16 model without the top layers (include_top=False)
+    vgg_base = VGG16(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
+
+    # Freeze the convolutional base layers (to avoid retraining them)
+    for layer in vgg_base.layers:
+        layer.trainable = False
+
+    # Create a new input layer for 48x48x1 images
+    input_layer = Input(shape=(height, width, channels))
+
+    # Replicate the single grayscale channel into 3 channels
+    x = Conv2D(3, (3, 3), padding='same')(input_layer)
+
+    if channels == 1:
+        x = replicate_channels(x)   # Create 3 channels from 1
+
+    # Resize images from 48x48 to 224x224 to match the input size of VGG16
+    x = tf.image.resize(x, (224, 224))
+
+    # Pass the resized grayscale images through the pre-trained VGG16 base
+    x = vgg_base(x)
+
+    # Add new layers on top of the VGG16 base for emotion classification
+    x = Flatten()(x)
+    x = Dense(128, activation='relu')(x)  # Custom dense layers
+    x = Dropout(0.5)(x)
+    output_layer = Dense(num_labels, activation='softmax')(x)  # Output layer for your task
+
+    # Define the new model
+    model = Model(inputs=input_layer, outputs=output_layer)
+
+    return model
 
 # Function to generate the model
-def create_model(n_labels, layers=None, values=None):
+def create_model(n_labels, layers=None, values=None, f_optimizer=None):
     if layers is None:
         layers = [Layer.CONV2D, Layer.CONV2D, Layer.MAXPOOLING2D, Layer.DROPOUT,
                   Layer.CONV2D, Layer.CONV2D, Layer.MAXPOOLING2D, Layer.DROPOUT,
@@ -76,6 +144,8 @@ def create_model(n_labels, layers=None, values=None):
                                  input_shape=input_size, padding=values[value_number][4]))
         elif layer == Layer.MAXPOOLING2D:
             model.add(MaxPooling2D(pool_size=(values[value_number][0], values[value_number][1]), strides=(values[value_number][2], values[value_number][3])))
+        elif layer == Layer.AVGPOOLING2D:
+            model.add(AvgPool2D(pool_size=(values[value_number][0], values[value_number][1]), strides=(values[value_number][2], values[value_number][3])))
         elif layer == Layer.BATCHNORMALIZATION:
             model.add(BatchNormalization())
         elif layer == Layer.DROPOUT:
@@ -87,9 +157,12 @@ def create_model(n_labels, layers=None, values=None):
 
         value_number+=1
 
+    if f_optimizer is None:
+        f_optimizer = Adam()
+
     # Compliling the model
     model.compile(loss=categorical_crossentropy,
-                  optimizer=Adam(),
+                  optimizer=f_optimizer,
                   metrics=['accuracy',
                            tf.keras.metrics.Precision(),
                            tf.keras.metrics.Recall(thresholds=0.5),
@@ -113,7 +186,6 @@ def create_model(n_labels, layers=None, values=None):
 
     return model
 
-
 # Function to split the images and classes for the training
 def split_for_training(x_all, y_all, t_percentage):
     # Calculate the split index
@@ -127,7 +199,6 @@ def split_for_training(x_all, y_all, t_percentage):
     y_train = y_all[:split_index]
     y_test = y_all[split_index:]
     return x_train, x_test, y_train, y_test
-
 
 # Function to plot
 def plotting(hist):
@@ -149,8 +220,11 @@ def plotting(hist):
                     'mean_io_u': hist_df['mean_io_u']}
     metrics_df = pd.DataFrame.from_records([metrics_data])
 
-    with open(metrics_path + "/plots.csv", mode='w') as f:
-        hist_df.to_csv(f, index_label='epoch')
+    # Save each metric individually in its own CSV file
+    for metric in hist_df.columns:
+        metric_data = hist_df[[metric]]  # Select the metric
+        metric_file_name = f"{metrics_path}/{metric}.csv"  # Assign the CSV file name
+        metric_data.to_csv(metric_file_name, index_label='epoch')  # Save the metric in a CSV file
 
     with open(metrics_path + "/scores.json", mode='w') as f:
         metrics_df.to_json(f)
@@ -182,13 +256,18 @@ model_path = params['training']['model_path']
 num_labels = params['training']['num_labels']
 batch_size = params['training']['batch_size']
 epochs = params['training']['epochs']
-width, height = 48, 48
+early_stopping_patience = params['training']['early_stopping_patience']
 train_percentage = params['training']['train_percentage']
+optimizer = params['training']['optimizer']
+learning_rate = params['training']['learning_rate']
+
+transfer_learning = params['training']['transfer_learning']
 
 show_summary = params['training']['show_summary']
 metrics_path = params['training']['metrics_path']
 
 # Getting the FCNN structure parameters
+width, height, channels = params['training']['input_layer']
 structure_layers = [Layer[layer] for layer in params['training']['structure_layers']]
 structure_values = params['training']['structure_values']
 
@@ -234,11 +313,23 @@ X_train /= std_x_train
 X_test -= mean_x_test
 X_test /= std_x_test
 
-X_train = X_train.reshape(X_train.shape[0], 48, 48, 1)
-X_test = X_test.reshape(X_test.shape[0], 48, 48, 1)
+X_train = X_train.reshape(X_train.shape[0], height, width, channels)
+X_test = X_test.reshape(X_test.shape[0], height, width, channels)
 
 # Getting the model
-cnn = create_model(n_labels=num_labels, layers=structure_layers, values=structure_values)
+if transfer_learning:
+    cnn = create_transfer_learning_model(height, width, channels)
+else:
+    # Generates the optimizer
+    f_optimizer = create_optimizer(optimizer, learning_rate)
+    cnn = create_model(n_labels=num_labels, layers=structure_layers, values=structure_values, f_optimizer=f_optimizer)
+
+# Implementing early stopping
+early_stopping = EarlyStopping(
+    monitor='val_loss',   # Loss validation monitoring
+    patience=early_stopping_patience,
+    restore_best_weights=True  # Restores best weights
+)
 
 # Training the model
 history = cnn.fit(X_train, Y_train,
@@ -246,7 +337,8 @@ history = cnn.fit(X_train, Y_train,
                   epochs=epochs,
                   verbose=1,
                   validation_data=(X_test, Y_test),
-                  shuffle=True)
+                  shuffle=True,
+                  callbacks=[early_stopping])
 
 # Saving the  model to  use it later on
 fer_json = cnn.to_json()

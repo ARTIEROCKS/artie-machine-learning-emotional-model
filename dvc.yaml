@@ -35,7 +35,19 @@ stages:
       - metrics/scores.json:
           cache: true
     plots:
-      - metrics/plots.csv
+      - metrics/loss.csv
+      - metrics/accuracy.csv
+      - metrics/precision.csv
+      - metrics/recall.csv
+      - metrics/val_loss.csv
+      - metrics/false_positives.csv
+      - metrics/false_negatives.csv
+      - metrics/true_positives.csv
+      - metrics/true_negatives.csv
+      - metrics/precision_at_recall.csv
+      - metrics/sensitivity_at_specificity.csv
+      - metrics/specificity_at_sensitivity.csv
+      - metrics/mean_io_u.csv
 artifacts:
   emotional-model:
     path: model/fer.h5
