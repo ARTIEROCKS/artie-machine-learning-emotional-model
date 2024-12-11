@@ -44,7 +44,7 @@ training:
   train_percentage: 0.7
   learning_rate: 0.001
   optimizer: ADAM
-  transfer_learning: false
+  transfer_learning: true
   show_summary: true
   input_layer:
   - 48
