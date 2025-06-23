@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 import pandas as pd
 from keras import Sequential
-from keras.src.layers import Conv2D, MaxPooling2D, Dropout, Flatten, Dense, BatchNormalization, Input
+from keras.src.layers import Conv2D, MaxPooling2D, Dropout, Flatten, Dense, BatchNormalization, Input, Lambda
 from keras.src.losses import categorical_crossentropy
 from keras.src.optimizers import Adam
 from tensorflow.python.layers.pooling import AvgPool2D
@@ -81,7 +81,7 @@ def create_optimizer(o, lr):
     return new_optimizer
 
 # Function to do transfer learning
-def create_transfer_learning_model(height=48, width=48, channels=1):
+def create_transfer_learning_model(height=48, width=48, channels=1, n_labels=7, f_optimizer=None):
     # Load the VGG16 model without the top layers (include_top=False)
     vgg_base = VGG16(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
 
@@ -93,10 +93,10 @@ def create_transfer_learning_model(height=48, width=48, channels=1):
     input_layer = Input(shape=(height, width, channels))
 
     # Replicate the single grayscale channel into 3 channels
-    x = Conv2D(3, (3, 3), padding='same')(input_layer)
-
     if channels == 1:
-        x = replicate_channels(x)   # Create 3 channels from 1
+        x = Lambda(lambda y: tf.image.grayscale_to_rgb(y))(input_layer)
+    else:
+        x = input_layer  # Assume already RGB if channels != 1
 
     # Resize images from 48x48 to 224x224 to match the input size of VGG16
     x = tf.image.resize(x, (224, 224))
@@ -112,6 +112,33 @@ def create_transfer_learning_model(height=48, width=48, channels=1):
 
     # Define the new model
     model = Model(inputs=input_layer, outputs=output_layer)
+
+    if f_optimizer is None:
+        f_optimizer = Adam()
+
+    # Compliling the model
+    model.compile(loss=categorical_crossentropy,
+                  optimizer=f_optimizer,
+                  metrics=['accuracy',
+                           tf.keras.metrics.Precision(),
+                           tf.keras.metrics.Recall(thresholds=0.5),
+                           tf.keras.metrics.FalsePositives(),
+                           tf.keras.metrics.FalseNegatives(),
+                           tf.keras.metrics.TruePositives(),
+                           tf.keras.metrics.TrueNegatives(),
+                           tf.keras.metrics.PrecisionAtRecall(0.5),
+                           tf.keras.metrics.SensitivityAtSpecificity(0.5),
+                           tf.keras.metrics.SpecificityAtSensitivity(0.5),
+                           tf.keras.metrics.MeanIoU(
+                            n_labels,
+                               name=None,
+                               dtype=None,
+                               ignore_class=None,
+                               sparse_y_true=True,
+                               sparse_y_pred=True,
+                               axis=-1,
+                           )
+                ])
 
     return model
 
@@ -316,12 +343,13 @@ X_test /= std_x_test
 X_train = X_train.reshape(X_train.shape[0], height, width, channels)
 X_test = X_test.reshape(X_test.shape[0], height, width, channels)
 
+# Generates the optimizer
+f_optimizer = create_optimizer(optimizer, learning_rate)
+
 # Getting the model
 if transfer_learning:
-    cnn = create_transfer_learning_model(height, width, channels)
+    cnn = create_transfer_learning_model(height=height, width=width, channels=channels, n_labels=num_labels, f_optimizer=f_optimizer)
 else:
-    # Generates the optimizer
-    f_optimizer = create_optimizer(optimizer, learning_rate)
     cnn = create_model(n_labels=num_labels, layers=structure_layers, values=structure_values, f_optimizer=f_optimizer)
 
 # Implementing early stopping

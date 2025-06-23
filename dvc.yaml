@@ -29,6 +29,10 @@ stages:
       - training.train_percentage
       - training.structure_layers
       - training.structure_values
+      - training.early_stopping_patience
+      - training.optimizer
+      - training.transfer_learning
+      - training.show_summary
     outs:
       - model/fer.json
     metrics:
