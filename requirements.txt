@@ -26,6 +26,7 @@ jax==0.4.30
 jaxlib==0.4.30
 jedi==0.19.1
 jmespath==1.0.1
+# Keras 2.15 aligned with TF 2.15 (NOT compatible with TF 2.16+)
 keras==2.15.0
 kiwisolver==1.4.5
 libclang==16.0.6
@@ -65,13 +66,8 @@ s3transfer==0.10.0
 scipy==1.14.1
 six==1.16.0
 stack-data==0.6.3
+# TensorBoard aligned with TF 2.15
 tensorboard==2.15.1
-tensorboard-data-server==0.7.2
-tensorflow==2.15.0
-tensorflow-estimator==2.15.0
-tensorflow-io-gcs-filesystem==0.35.0
-termcolor==2.4.0
-tf==1.0.0
 tqdm==4.66.1
 traitlets==5.14.0
 typing_extensions==4.9.0
@@ -80,3 +76,18 @@ urllib3==2.0.7
 wcwidth==0.2.12
 Werkzeug==3.0.1
 wrapt==1.14.1
+
+# === TensorFlow stack 2.15 (prevents accidental install of 2.16.x) ===
+# For macOS (Apple Silicon / Intel)
+tensorflow-macos==2.15.0; platform_system == "Darwin"
+# Metal plugin (macOS only)
+tensorflow-metal==1.1.0; platform_system == "Darwin"
+# Generic package for non-macOS (Linux/Windows)
+tensorflow==2.15.0; platform_system != "Darwin"
+
+# Optional Addons for GPU rotations (compatible with 2.15)
+tensorflow-addons==0.22.0
+
+# NOTE: If tensorflow>=2.16 is already installed uninstall first:
+# pip uninstall -y tensorflow tensorflow-cpu tensorflow-macos tensorflow-metal keras ml-dtypes tensorboard
+# Then reinstall using this requirements file.
