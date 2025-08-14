@@ -1,139 +1,161 @@
 import yaml
 import sys
-import imutils
 import cv2
 import os
-import shutil
 import pandas as pd
 from tqdm import tqdm
 from pathlib import Path
+import tensorflow as tf
 
+# -----------------------------
+# CK+ emotion CSV normalization
+# -----------------------------
 
-# Function to normalize emotional state for CK+
 def ck_emotional_state_normalization(emotional_state_path, augmented_images_path, root_path, csv_path):
-    print("Image List and Emotion Collection")
+    """Build a CSV mapping each augmented image to its emotion label for CK+ dataset."""
+    print("Building CK+ emotion mapping")
 
     emotions_list = []
     corresponding_images = []
     emotions_file_list = list(Path(emotional_state_path).rglob("*.txt"))
 
-    for emotion_file in tqdm(emotions_file_list, desc="Normalizing CK+ emotions", unit=" image"):
-        # Reading the emotional state from the emotions_file_list
-        f = open(str(emotion_file), "r")
-        contents = f.read()
+    for emotion_file in tqdm(emotions_file_list, desc="Normalizing CK+ emotions", unit=" file"):
+        # Read emotion value
+        with open(str(emotion_file), "r") as f:
+            contents = f.read()
         value = float(contents)
         emotion = int(value)
 
-        # Gets the name of the original corresponding image
+        # Derive base image name from emotion filename
         emotion_file_splitted = str(emotion_file).split("/")
-        emotion_file_name = emotion_file_splitted[len(emotion_file_splitted) - 1]
-        emotion_file_name_splitted = emotion_file_name.split(".")
-        emotion_file_name_splitted = emotion_file_name_splitted[0].split("_emotion")
+        emotion_file_name = emotion_file_splitted[-1]
+        emotion_file_name_splitted = emotion_file_name.split(".")[0].split("_emotion")
         emotion_file_name = emotion_file_name_splitted[0]
 
-        # Gets the augmented files corresponding to the emotional state
+        # Find all augmented images that start with the base name
         emotion_image_list = list(Path(root_path).rglob(emotion_file_name + "*.png"))
         for image in emotion_image_list:
             emotions_list.append(emotion)
             corresponding_images.append(str(image))
 
-    # Adds all the rows and columns to the emotion data frame
+    # Create DataFrame and append to CSV (header written once by using header=True here)
     d = {'emotion': emotions_list, 'corresponding_image': corresponding_images}
     emotions_df = pd.DataFrame(data=d)
     emotions_df.to_csv(csv_path, index=False, header=True, mode='a')
 
 
-# Function to normalize the CK+ augmented files
+# ---------------------------------
+# CK+ image normalization to 48x48
+# ---------------------------------
+
 def ck_normalization(ds_images_augmented_path):
-    # Getting the list of images
+    """Normalize CK+ augmented images: grayscale + resize to 48x48 (GPU resize)."""
     image_list = list(Path(ds_images_augmented_path).rglob("*.png"))
+    print("CK+ image normalization starting")
 
-    print("CK+ Image normalization is starting.")
-
-    # loop over the input images
-    for inputPath in tqdm(image_list, desc="Normalizing CK+", unit=" image"):
-        # load the image, convert it to grayscale, and describe it
-        image = cv2.imread(str(inputPath))
-
+    for input_path in tqdm(image_list, desc="Normalizing CK+", unit=" image"):
+        # Load BGR image
+        image = cv2.imread(str(input_path))
+        if image is None:
+            continue
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-        # write the output image to disk
-        resized = cv2.resize(gray, (48, 48))
-        cv2.imwrite(os.path.join(normalization_path, str(inputPath).split("/")[-1]), resized)
+        # TensorFlow GPU resize
+        gray_tensor = tf.convert_to_tensor(gray, dtype=tf.uint8)
+        gray_tensor = tf.expand_dims(gray_tensor, axis=-1)  # (H,W,1)
+        gray_f32 = tf.image.convert_image_dtype(gray_tensor, dtype=tf.float32)
+        resized_f32 = tf.image.resize(gray_f32, (48, 48), method='bilinear', antialias=True)
+        resized_u8 = tf.image.convert_image_dtype(resized_f32, dtype=tf.uint8)
+        resized = resized_u8.numpy().squeeze(axis=-1)
 
-        # display the output images
-        # cv2.imshow("Resized", resized)
-        # cv2.waitKey(1)
+        cv2.imwrite(os.path.join(normalization_path, str(input_path).split("/")[-1]), resized)
 
 
-# Function to normalize FER 2013 dataset
+# ---------------------------------
+# FER2013 dataset normalization
+# ---------------------------------
+
 def fer2013_normalization(dataset_path, destination_path, emotion_csv_file, es_mapping):
-    print("FER 2013 Image normalization is starting.")
+    """Normalize FER2013 images (grayscale + 48x48 GPU resize) and append emotion CSV rows."""
+    print("FER2013 image normalization starting")
 
-    # Getting training images
-    emotional_states = [name for name in os.listdir(dataset_path) if
-                        os.path.isdir(os.path.join(dataset_path, name))]
+    emotional_states = [name for name in os.listdir(dataset_path) if os.path.isdir(os.path.join(dataset_path, name))]
     data = []
 
-    # Iterate through each subfolder
     for emotional_state in emotional_states:
-
-        # Full path of the subfolder
         subfolder_path = os.path.join(dataset_path, emotional_state)
-
-        # Get names of files in the subfolder
         file_names = os.listdir(subfolder_path)
-
-        # Iterate through each file in the subfolder
-        for file_name in tqdm(file_names, desc="Normalizing FER2013", unit=" image"):
+        for file_name in tqdm(file_names, desc=f"Normalizing FER2013:{emotional_state}", unit=" image"):
             full_file_path = os.path.join(subfolder_path, file_name)
             image = cv2.imread(str(full_file_path))
+            if image is None:
+                continue
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-            # write the output image to disk
-            new_file_path = os.path.join(destination_path, file_name)
-            resized = cv2.resize(gray, (48, 48))
-            cv2.imwrite(new_file_path, resized)
+            # GPU resize
+            gray_tensor = tf.convert_to_tensor(gray, dtype=tf.uint8)
+            gray_tensor = tf.expand_dims(gray_tensor, -1)
+            gray_f32 = tf.image.convert_image_dtype(gray_tensor, dtype=tf.float32)
+            resized_f32 = tf.image.resize(gray_f32, (48, 48), method='bilinear', antialias=True)
+            resized_u8 = tf.image.convert_image_dtype(resized_f32, dtype=tf.uint8)
+            resized = resized_u8.numpy().squeeze(-1)
 
-            # Write the information in the dataframe
+            new_file_path = os.path.join(destination_path, file_name)
+            cv2.imwrite(new_file_path, resized)
             data.append({'emotion': int(es_mapping[emotional_state]), 'corresponding_image': new_file_path})
 
-    # Writes the data in the csv file
+    # Append CSV rows (no header)
     temp_df = pd.DataFrame(data=data)
     temp_df.to_csv(emotion_csv_file, index=False, header=False, mode='a')
 
 
-def liris_normalization(source_path, destination_path, emotion_csv_file, es_mapping):
-    print("LIRIS Image normalization is starting.")
+# ---------------------------------
+# LIRIS dataset normalization
+# ---------------------------------
 
-    # Getting the list of images
-    image_list = [name for name in os.listdir(source_path) if name.endswith(".png") or name.endswith(".jpg")]
+def liris_normalization(source_path, destination_path, emotion_csv_file, es_mapping):
+    """Normalize LIRIS images (grayscale + 48x48 GPU resize) and append emotion CSV rows."""
+    print("LIRIS image normalization starting")
+
+    image_list = [name for name in os.listdir(source_path) if name.lower().endswith((".png", ".jpg", ".jpeg"))]
     data = []
 
-    # loop over the input images
     for image_name in tqdm(image_list, desc="Normalizing LIRIS", unit=" image"):
-
-        # Extract emotional state from the file name
-        emotional_state = image_name.split('_')[1]
+        # Extract emotion token from filename (expected pattern with underscore)
+        parts = image_name.split('_')
+        if len(parts) < 2:
+            continue
+        emotional_state = parts[1]
 
         full_file_path = os.path.join(source_path, image_name)
         image = cv2.imread(str(full_file_path))
+        if image is None:
+            continue
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-        # write the output image to disk
+        # GPU resize
+        gray_tensor = tf.convert_to_tensor(gray, dtype=tf.uint8)
+        gray_tensor = tf.expand_dims(gray_tensor, -1)
+        gray_f32 = tf.image.convert_image_dtype(gray_tensor, dtype=tf.float32)
+        resized_f32 = tf.image.resize(gray_f32, (48, 48), method='bilinear', antialias=True)
+        resized_u8 = tf.image.convert_image_dtype(resized_f32, dtype=tf.uint8)
+        resized = resized_u8.numpy().squeeze(-1)
+
         new_file_path = os.path.join(destination_path, image_name)
-        resized = cv2.resize(gray, (48, 48))
         cv2.imwrite(new_file_path, resized)
 
-        # Write the information in the dataframe
-        data.append({'emotion': int(es_mapping[emotional_state.lower()]), 'corresponding_image': new_file_path})
+        key = emotional_state.lower()
+        if key in es_mapping:
+            data.append({'emotion': int(es_mapping[key]), 'corresponding_image': new_file_path})
 
-    # Writes the data in the csv file
     temp_df = pd.DataFrame(data=data)
     temp_df.to_csv(emotion_csv_file, index=False, header=False, mode='a')
 
 
-# Loading the parameters
+# -----------------------------
+# Parameter loading and execution
+# -----------------------------
+
 params_file = sys.argv[1]
 with open(params_file, 'r') as fd:
     params = yaml.safe_load(fd)
@@ -148,7 +170,7 @@ emotion_csv_path = params['normalization']['csv_path']
 
 Path(normalization_path).mkdir(parents=True, exist_ok=True)
 
-# Create a dictionary
+# Emotion mapping dictionary (unified across datasets)
 mapping = {
     'neutral': 0,
     'angry': 1,
@@ -163,20 +185,17 @@ mapping = {
     'suprise': 7
 }
 
-# Normalize CK+ dataset and creates the csv of emotions
+# CK+ normalization + emotions CSV
 if params['general']['active_datasets']['ck']:
     ck_normalization(dataset_ck_images_augmented_path)
     ck_emotional_state_normalization(dataset_ck_emotions_augmented_path, dataset_ck_images_augmented_path,
                                      normalization_path, emotion_csv_path)
 
-# Normalize FER 2013 datasets
+# FER2013 normalization (train + test)
 if params['general']['active_datasets']['fer2013']:
-    fer2013_normalization(dataset_images_fer2013_path + "/train", normalization_path, normalization_path + "/emotions.csv",
-                           mapping)
-    fer2013_normalization(dataset_images_fer2013_path + "/test", normalization_path, normalization_path + "/emotions.csv",
-                          mapping)
+    fer2013_normalization(os.path.join(dataset_images_fer2013_path, "train"), normalization_path, os.path.join(normalization_path, "emotions.csv"), mapping)
+    fer2013_normalization(os.path.join(dataset_images_fer2013_path, "test"), normalization_path, os.path.join(normalization_path, "emotions.csv"), mapping)
 
-# Normalize LIRIS dataset
+# LIRIS normalization
 if params['general']['active_datasets']['liris']:
-    liris_normalization(dataset_images_augmented_liris_path, normalization_path, normalization_path + "/emotions.csv",
-                        mapping)
+    liris_normalization(dataset_images_augmented_liris_path, normalization_path, os.path.join(normalization_path, "emotions.csv"), mapping)
