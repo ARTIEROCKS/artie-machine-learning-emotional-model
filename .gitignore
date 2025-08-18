@@ -1,5 +1,61 @@
-data
+# Python caches
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+venv2/
 .env
-venv
-venv2
-logs
+
+# Build / packaging
+build/
+dist/
+*.egg-info/
+
+# IDE / Editor / OS
+.idea/
+.vscode/
+.DS_Store
+
+# Logs & temp
+logs/
+*.log
+.tmp/
+.temp/
+
+# Test / tooling caches
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.cache/
+
+# DVC internal caches (do not commit)
+.dvc/cache/
+.dvc/tmp/
+
+# Data directories (tracked via DVC, keep out of Git)
+data/
+
+# Model large artifacts (keep binaries out by default)
+model/*.h5
+model/*.keras
+model/checkpoints/
+
+# Allow selected small artifacts
+!model/fer.json
+!model/fer.h5
+
+# Keep metrics & pipeline config
+!metrics/
+!params.yaml
+!dvc.yaml
+!dvc.lock
+
+# Plots (optional: comment out if you want to version them)
+# plots/
+
+# Local environment overrides
+*.local.json
