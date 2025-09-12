@@ -65,3 +65,6 @@ artifacts:
   help_model:
     path: model/help_model.keras
     type: model
+  help_model_attention:
+    path: model/help_model_attention.keras
+    type: model
