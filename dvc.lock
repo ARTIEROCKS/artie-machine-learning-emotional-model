@@ -72,7 +72,7 @@ stages:
     params:
       params.yaml:
         training.batch_size: 8
-        training.early_stopping_patience: 30
+        training.early_stopping_patience: 100
         training.epochs: 1
         training.optimizer: ADAM
         training.show_summary: true
@@ -157,7 +157,7 @@ stages:
     outs:
     - path: metrics/accuracy.csv
       hash: md5
-      md5: fe81051c7eb2e3c2e3d8665fc4672a96
+      md5: 608a6240f3462975e893c9de8c197c82
       size: 37
     - path: metrics/false_negatives.csv
       hash: md5
@@ -165,23 +165,23 @@ stages:
       size: 32
     - path: metrics/false_positives.csv
       hash: md5
-      md5: 887f095d0dec3fd3c3bc871755e007f2
-      size: 28
+      md5: 5db0e027f646f9277aca62b964323110
+      size: 29
     - path: metrics/loss.csv
       hash: md5
-      md5: 20afee7ee239aa3c747c9b4d0f6b9416
-      size: 32
+      md5: 09b09306227298d42a0b321659fc3233
+      size: 31
     - path: metrics/mean_io_u.csv
       hash: md5
       md5: dabe4a30fcbd0e53c97dbec1beff2b79
       size: 25
     - path: metrics/precision.csv
       hash: md5
-      md5: 196a63ede09d339117f57341ee5715d3
+      md5: bf39d15e105204b00b8625c167d81d14
       size: 37
     - path: metrics/precision_at_recall.csv
       hash: md5
-      md5: 32135e2191b8caec08d795cb0d0b9553
+      md5: fc7a63f7c81ea08da4f0a93c854c22dc
       size: 48
     - path: metrics/recall.csv
       hash: md5
@@ -189,19 +189,19 @@ stages:
       size: 37
     - path: metrics/scores.json
       hash: md5
-      md5: 29336ae0ea943d7829dbcb7fd2ad361e
-      size: 439
+      md5: adcdd8ece36a4cd4c197ae08204eb849
+      size: 440
     - path: metrics/sensitivity_at_specificity.csv
       hash: md5
-      md5: 6f9879c49b69949d22ef248cbeba7c8c
-      size: 53
+      md5: c3d782a380360f28fea4e6107a69dff9
+      size: 54
     - path: metrics/specificity_at_sensitivity.csv
       hash: md5
-      md5: 972305b5cd351723f497fdd53a521a33
+      md5: 8d68bbc9193aa6284d3e8b376a9c4797
       size: 54
     - path: metrics/true_negatives.csv
       hash: md5
-      md5: fdb34e2019052e23ef31879f9daf71da
+      md5: a17d81b3ff3d9b612c73f2e03ee6bae7
       size: 32
     - path: metrics/true_positives.csv
       hash: md5
@@ -209,7 +209,7 @@ stages:
       size: 27
     - path: metrics/val_loss.csv
       hash: md5
-      md5: 1f2a5e17e5a41ffcd747fd8083cfab30
+      md5: 35613ee8ad2585a6e6c80874e91f90fa
       size: 36
     - path: model/fer.json
       md5: f5aae1d58b95e109b93223a0170a29db
