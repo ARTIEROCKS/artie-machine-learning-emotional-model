@@ -71,8 +71,8 @@ stages:
       nfiles: 89822
     params:
       params.yaml:
-        training.batch_size: 8
-        training.early_stopping_patience: 30
+        training.batch_size: 32
+        training.early_stopping_patience: 100
         training.epochs: 1
         training.optimizer: ADAM
         training.show_summary: true
@@ -153,64 +153,65 @@ stages:
         - - 8
           - softmax
         training.train_percentage: 0.7
-        training.transfer_learning: false
+        training.transfer_learning: true
     outs:
     - path: metrics/accuracy.csv
       hash: md5
-      md5: fe81051c7eb2e3c2e3d8665fc4672a96
-      size: 37
+      md5: c09a29a80026c2e9580da182eb975fe8
+      size: 36
     - path: metrics/false_negatives.csv
       hash: md5
-      md5: 79bc0b98f22dba5f5df5bc8017c0b923
+      md5: e1938af885f254c3e03144e35b3adce5
       size: 32
     - path: metrics/false_positives.csv
       hash: md5
-      md5: 887f095d0dec3fd3c3bc871755e007f2
-      size: 28
+      md5: 41903f5a0ab8acfa178c707ab4f2aae2
+      size: 32
     - path: metrics/loss.csv
       hash: md5
-      md5: 20afee7ee239aa3c747c9b4d0f6b9416
+      md5: 2aae0e1554008d928a5f8d1c981331c5
       size: 32
     - path: metrics/mean_io_u.csv
       hash: md5
-      md5: dabe4a30fcbd0e53c97dbec1beff2b79
-      size: 25
+      md5: 8503856980138dbcbca0209cb6aa6932
+      size: 38
     - path: metrics/precision.csv
       hash: md5
-      md5: 196a63ede09d339117f57341ee5715d3
+      md5: 4f999dddd0f474f7e144d5afa4cf6161
       size: 37
     - path: metrics/precision_at_recall.csv
       hash: md5
-      md5: 32135e2191b8caec08d795cb0d0b9553
-      size: 48
+      md5: b5da066cbcefa8440928ff0b36fd7bb3
+      size: 47
     - path: metrics/recall.csv
       hash: md5
-      md5: e8456b6d4a4f6aae5037294f31db3714
-      size: 37
+      md5: cf82bf5885491fa8149edea6c925d781
+      size: 34
     - path: metrics/scores.json
       hash: md5
-      md5: 29336ae0ea943d7829dbcb7fd2ad361e
-      size: 439
+      md5: 4ae3abe2c7a9e63f83ad4ce71dc55d25
+      size: 451
     - path: metrics/sensitivity_at_specificity.csv
       hash: md5
-      md5: 6f9879c49b69949d22ef248cbeba7c8c
-      size: 53
+      md5: 03f503dae532d547a0b937c3b0eeafee
+      size: 54
     - path: metrics/specificity_at_sensitivity.csv
       hash: md5
-      md5: 972305b5cd351723f497fdd53a521a33
-      size: 54
+      md5: 4e834de68f682508e96a078f0d57ebf2
+      size: 53
     - path: metrics/true_negatives.csv
       hash: md5
-      md5: fdb34e2019052e23ef31879f9daf71da
+      md5: 250476a8669953bce6566d718cf462af
       size: 32
     - path: metrics/true_positives.csv
       hash: md5
-      md5: e119f27e96f0c49cf9a4eadadebc8741
-      size: 27
+      md5: 55d954342a56f6ef5a0e4ee7b7260a21
+      size: 31
     - path: metrics/val_loss.csv
       hash: md5
-      md5: 1f2a5e17e5a41ffcd747fd8083cfab30
+      md5: 64a78f78abd38080f2c24276a19b4631
       size: 36
     - path: model/fer.json
-      md5: f5aae1d58b95e109b93223a0170a29db
-      size: 9340
+      hash: md5
+      md5: 0bd2ab1672b9778fde2d2f4ed863a66e
+      size: 17302
