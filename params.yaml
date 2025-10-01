@@ -38,13 +38,13 @@ training:
   metrics_path: metrics
   model_path: model
   num_labels: 8
-  batch_size: 8
+  batch_size: 64
   epochs: 1
-  early_stopping_patience: 30
+  early_stopping_patience: 100
   train_percentage: 0.7
   learning_rate: 0.001
   optimizer: ADAM
-  transfer_learning: false
+  transfer_learning: true
   show_summary: true
   input_layer:
   - 48
